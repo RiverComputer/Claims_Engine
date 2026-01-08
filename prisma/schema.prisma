@@ -1,0 +1,86 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  ownerUserId String   @default("guest")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  nodes   Node[]
+  edges   Edge[]
+  commits Commit[]
+
+  @@index([ownerUserId])
+}
+
+model Node {
+  id            String   @id @default(uuid())
+  projectId     String
+  type          String   // "evidence" | "validation" | "claim"
+  status        String   @default("draft") // "draft" | "committed"
+  positionX     Float
+  positionY     Float
+  data          String   // JSON string of node payload
+  cid           String?  // Content identifier (on commit)
+  attestationUID String? // Attestation UID (on commit)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  edgesFrom Edge[]  @relation("FromNode")
+  edgesTo   Edge[]  @relation("ToNode")
+  commits   Commit[]
+
+  @@index([projectId])
+  @@index([type])
+  @@index([status])
+}
+
+model Edge {
+  id        String   @id @default(uuid())
+  projectId String
+  fromNodeId String
+  toNodeId   String
+  type      String   // "references" | "validates" | "includes"
+  locked    Boolean  @default(false) // Locked if either node is committed
+  createdAt DateTime @default(now())
+
+  project  Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  fromNode Node    @relation("FromNode", fields: [fromNodeId], references: [id], onDelete: Cascade)
+  toNode   Node    @relation("ToNode", fields: [toNodeId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([fromNodeId])
+  @@index([toNodeId])
+  @@unique([fromNodeId, toNodeId, type])
+}
+
+model Commit {
+  id            String   @id @default(uuid())
+  projectId     String
+  nodeId        String
+  adapterType   String   // "mock" | "ipfs" | "eas"
+  cid           String
+  attestationUID String
+  payload       String   // JSON string of committed payload snapshot
+  metadata      String?  // JSON string of adapter-specific metadata
+  committedAt   DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  node    Node   @relation(fields: [nodeId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([nodeId])
+  @@index([adapterType])
+}
+
