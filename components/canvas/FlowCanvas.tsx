@@ -52,11 +52,14 @@ export function FlowCanvas({
   const [nodes, setNodes, onNodesChangeInternal] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChangeInternal] = useEdgesState(initialEdges);
   const reactFlowInstance = useRef<ReactFlowInstance | null>(null);
+  const historyRef = useRef<Node[][]>([]);
+  const isApplyingHistoryRef = useRef(false);
 
   // Smart sync: only update when nodes are actually added/removed, preserve positions of existing nodes
   const prevNodeIdsRef = useRef<Set<string>>(new Set());
   const isInitialMountRef = useRef(true);
   const prevEdgesRef = useRef<string>("");
+  const prevNodesRef = useRef<Node[]>([]);
 
   useEffect(() => {
     const currentNodeIds = new Set(initialNodes.map(n => n.id));
@@ -66,6 +69,7 @@ export function FlowCanvas({
     if (isInitialMountRef.current) {
       console.log("FlowCanvas: Initial mount - syncing all nodes from DB");
       setNodes(initialNodes.map(n => ({ ...n })));
+      prevNodesRef.current = initialNodes.map(n => ({ ...n, position: { ...n.position } }));
       prevNodeIdsRef.current = currentNodeIds;
       isInitialMountRef.current = false;
       return;
@@ -111,6 +115,44 @@ export function FlowCanvas({
   }, [initialNodes]); // Only depend on initialNodes, not nodes (to avoid circular updates)
 
   useEffect(() => {
+    if (isInitialMountRef.current || isApplyingHistoryRef.current) {
+      return;
+    }
+
+    const prevNodes = prevNodesRef.current;
+    if (!prevNodes.length) {
+      prevNodesRef.current = nodes.map(n => ({ ...n, position: { ...n.position } }));
+      return;
+    }
+
+    const prevIds = new Set(prevNodes.map(n => n.id));
+    const currentIds = new Set(nodes.map(n => n.id));
+    const hasIdChange =
+      prevIds.size !== currentIds.size ||
+      Array.from(currentIds).some((id) => !prevIds.has(id));
+
+    if (hasIdChange) {
+      prevNodesRef.current = nodes.map(n => ({ ...n, position: { ...n.position } }));
+      return;
+    }
+
+    const prevPosMap = new Map(prevNodes.map(n => [n.id, n.position]));
+    const hasPositionChange = nodes.some((node) => {
+      const prevPos = prevPosMap.get(node.id);
+      return !prevPos || prevPos.x !== node.position.x || prevPos.y !== node.position.y;
+    });
+
+    if (hasPositionChange) {
+      historyRef.current.push(prevNodes.map(n => ({ ...n, position: { ...n.position } })));
+      if (historyRef.current.length > 50) {
+        historyRef.current.shift();
+      }
+    }
+
+    prevNodesRef.current = nodes.map(n => ({ ...n, position: { ...n.position } }));
+  }, [nodes]);
+
+  useEffect(() => {
     // Create a signature of edge IDs to detect changes
     const edgesSignature = initialEdges.map(e => e.id).sort().join(',');
     
@@ -141,6 +183,65 @@ export function FlowCanvas({
     },
     [onEdgesChange, onEdgesChangeInternal]
   );
+
+  const applyUndo = useCallback(() => {
+    const previous = historyRef.current.pop();
+    if (!previous) return;
+
+    isApplyingHistoryRef.current = true;
+    setNodes(previous.map(n => ({ ...n, position: { ...n.position } })));
+
+    const currentMap = new Map(nodes.map(n => [n.id, n]));
+    const changes = previous
+      .map((node) => {
+        const current = currentMap.get(node.id);
+        if (!current) return null;
+        if (current.position.x === node.position.x && current.position.y === node.position.y) {
+          return null;
+        }
+        return {
+          id: node.id,
+          type: "position",
+          position: { ...node.position },
+          dragging: false,
+        };
+      })
+      .filter(Boolean);
+
+    if (changes.length > 0) {
+      onNodesChange(changes);
+    }
+
+    isApplyingHistoryRef.current = false;
+  }, [nodes, onNodesChange, setNodes]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.defaultPrevented) return;
+
+      const target = event.target as HTMLElement | null;
+      const isTypingTarget =
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          (target as HTMLElement).isContentEditable);
+
+      if (isTypingTarget) return;
+
+      const isUndo =
+        (event.metaKey || event.ctrlKey) &&
+        !event.shiftKey &&
+        event.key.toLowerCase() === "z";
+
+      if (isUndo) {
+        event.preventDefault();
+        applyUndo();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [applyUndo]);
 
   // Handle new connections with validation
   const handleConnect = useCallback(
@@ -205,6 +306,8 @@ export function FlowCanvas({
         nodesDraggable={true}
         nodesConnectable={true}
         elementsSelectable={true}
+        selectionOnDrag={true}
+        multiSelectionKeyCode={["Shift", "Meta", "Control"]}
       >
         <Background 
           color="#e5e5e7" 

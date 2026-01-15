@@ -93,7 +93,7 @@ export default function ProjectPage() {
         id: e.id,
         source: e.fromNodeId,
         target: e.toNodeId,
-        type: "smoothstep",
+        type: "bezier",
         label: e.type,
         style: { stroke: e.locked ? "#999" : "#333" },
       }));
@@ -358,7 +358,7 @@ export default function ProjectPage() {
           id: newEdge.id,
           source: newEdge.fromNodeId,
           target: newEdge.toNodeId,
-          type: "smoothstep",
+          type: "bezier",
           label: newEdge.type,
           style: { stroke: newEdge.locked ? "#999" : "#333" },
         };
