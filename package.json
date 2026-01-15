@@ -4,8 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:prototype3": "NEXT_PUBLIC_PROTOTYPE=3 next dev",
     "build": "next build",
     "start": "next start",
+    "start:prototype3": "NEXT_PUBLIC_PROTOTYPE=3 next start",
     "lint": "eslint",
     "db:migrate": "prisma migrate dev",
     "db:generate": "prisma generate",

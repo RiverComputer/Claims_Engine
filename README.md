@@ -40,6 +40,15 @@ npm run dev
 
 4. Open [http://localhost:3000](http://localhost:3000)
 
+### Prototype 3 branch
+
+Work on prototype 3 in the `prototype3` branch and run:
+```bash
+npm run dev:prototype3
+```
+
+This keeps `main` stable for collaborators while you iterate on prototype 3.
+
 ## Seeding Obuntu pilot data
 
 Use the shared Obuntu pilot bundle to populate the graphs without local data.
