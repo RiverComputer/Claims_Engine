@@ -1,2 +1,121 @@
 @import "tailwindcss";
 
+/* Apple-like Design System */
+:root {
+  --apple-bg: #f5f5f7;
+  --apple-surface: #ffffff;
+  --apple-border: rgba(0, 0, 0, 0.1);
+  --apple-text: #1d1d1f;
+  --apple-text-secondary: #86868b;
+  --apple-blue: #007aff;
+  --apple-blue-hover: #0051d5;
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background-color: var(--apple-bg);
+  color: var(--apple-text);
+}
+
+/* Smooth transitions */
+button, a, input, textarea, select {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Apple-style buttons */
+.apple-button {
+  background: var(--apple-surface);
+  border: 1px solid var(--apple-border);
+  border-radius: 12px;
+  padding: 10px 20px;
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--apple-text);
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.apple-button:hover {
+  background: #fafafa;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+.apple-button-primary {
+  background: var(--apple-blue);
+  color: white;
+  border: none;
+}
+
+.apple-button-primary:hover {
+  background: var(--apple-blue-hover);
+  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+}
+
+/* Apple-style cards */
+.apple-card {
+  background: var(--apple-surface);
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--apple-border);
+  padding: 20px;
+}
+
+.apple-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Apple-style inputs */
+.apple-input {
+  background: var(--apple-surface);
+  border: 1px solid var(--apple-border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 15px;
+  color: var(--apple-text);
+  width: 100%;
+}
+
+.apple-input:focus {
+  outline: none;
+  border-color: var(--apple-blue);
+  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+}
+
+.apple-input::placeholder {
+  color: var(--apple-text-secondary);
+}
+
+/* React Flow styling */
+.react-flow__edge-path {
+  stroke: rgba(0, 0, 0, 0.2);
+  stroke-width: 2;
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: var(--apple-blue);
+  stroke-width: 3;
+}
+
+.react-flow__handle {
+  background: var(--apple-blue);
+  border: 2px solid white;
+  width: 8px;
+  height: 8px;
+}
+
+.react-flow__handle-connecting {
+  background: #ff6b6b;
+}
+
+.react-flow__handle-valid {
+  background: #51cf66;
+}
+

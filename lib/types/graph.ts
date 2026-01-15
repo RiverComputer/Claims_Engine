@@ -1,4 +1,4 @@
-export type NodeType = "evidence" | "validation" | "claim";
+export type NodeType = "evidence" | "validation" | "claim" | "claim_root";
 export type NodeStatus = "draft" | "committed";
 
 export interface EvidenceData {
@@ -6,6 +6,8 @@ export interface EvidenceData {
   content: string;
   shortDescription?: string;
   activity?: string;
+  fileRef?: string; // File reference URL (e.g., /api/files/[id])
+  color?: string; // Optional custom node color (hex)
   location?: {
     latitude?: number;
     longitude?: number;
@@ -20,6 +22,7 @@ export interface ValidationData {
   validatorNames: string[];
   validationType: string;
   evidenceCID: string[];
+  color?: string; // Optional custom node color (hex)
   location?: {
     latitude?: number;
     longitude?: number;
@@ -35,6 +38,7 @@ export interface ClaimData {
   validationCID: string[];
   image?: string;
   project?: string;
+  color?: string; // Optional custom node color (hex)
   createdAt: string;
 }
 

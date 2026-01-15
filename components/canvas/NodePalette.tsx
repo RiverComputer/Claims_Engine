@@ -9,26 +9,29 @@ interface NodePaletteProps {
 
 export function NodePalette({ onAddNode }: NodePaletteProps) {
   return (
-    <div className="bg-white border border-gray-300 rounded-lg shadow-lg p-4">
-      <div className="text-sm font-semibold mb-3">Add Node</div>
-      <div className="space-y-2">
+    <div className="apple-card">
+      <div className="text-sm font-semibold mb-4 text-gray-900">Add Node</div>
+      <div className="space-y-2.5">
         <button
           onClick={() => onAddNode("evidence")}
-          className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
+          className="w-full apple-button text-left flex items-center gap-3 px-4 py-3 hover:bg-blue-50 hover:border-blue-200"
         >
-          + Evidence
+          <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+          <span className="text-sm font-medium">Evidence</span>
         </button>
         <button
           onClick={() => onAddNode("validation")}
-          className="w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 text-sm"
+          className="w-full apple-button text-left flex items-center gap-3 px-4 py-3 hover:bg-green-50 hover:border-green-200"
         >
-          + Validation
+          <div className="w-2 h-2 rounded-full bg-green-500"></div>
+          <span className="text-sm font-medium">Validation</span>
         </button>
         <button
           onClick={() => onAddNode("claim")}
-          className="w-full px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 text-sm"
+          className="w-full apple-button text-left flex items-center gap-3 px-4 py-3 hover:bg-purple-50 hover:border-purple-200"
         >
-          + Claim
+          <div className="w-2 h-2 rounded-full bg-purple-500"></div>
+          <span className="text-sm font-medium">Claim</span>
         </button>
       </div>
     </div>

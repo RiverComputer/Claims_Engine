@@ -8,13 +8,22 @@
     "start": "next start",
     "lint": "eslint",
     "db:migrate": "prisma migrate dev",
-    "db:generate": "prisma generate"
+    "db:generate": "prisma generate",
+    "import:obuntu": "tsx scripts/import-obuntu-resets.ts",
+    "import:nv-mapping": "tsx scripts/import-nv-mapping.ts"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "7.1.0",
     "@prisma/client": "7.1.0",
+    "@types/d3-force": "^3.0.10",
+    "@types/dagre": "^0.7.53",
     "better-sqlite3": "^12.5.0",
+    "canvas": "^3.2.1",
+    "d3-force": "^3.0.0",
+    "dagre": "^0.8.5",
+    "exceljs": "^4.4.0",
     "next": "16.0.10",
+    "pdfjs-dist": "^5.4.530",
     "react": "19.2.1",
     "react-dom": "19.2.1",
     "reactflow": "^11.11.4",
@@ -30,6 +39,7 @@
     "eslint-config-next": "16.0.10",
     "prisma": "7.1.0",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }

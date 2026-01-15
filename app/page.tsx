@@ -56,49 +56,60 @@ export default function HomePage() {
   };
 
   if (loading) {
-    return <div className="p-8">Loading...</div>;
+    return (
+      <div className="h-screen flex items-center justify-center bg-[#f5f5f7]">
+        <div className="text-center">
+          <div className="text-gray-600 text-lg mb-2">Loading...</div>
+          <div className="w-8 h-8 border-2 border-gray-300 border-t-[#007aff] rounded-full animate-spin mx-auto"></div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Claims Engine v2</h1>
+    <div className="min-h-screen bg-[#f5f5f7] p-12">
+      <div className="max-w-5xl mx-auto">
+        <h1 className="text-5xl font-semibold mb-3 text-gray-900 tracking-tight">Claims Engine</h1>
+        <p className="text-xl text-gray-600 mb-12">Build and manage your claims</p>
 
-        <div className="mb-8">
-          <div className="flex gap-2 mb-4">
+        <div className="mb-12">
+          <div className="flex gap-3">
             <input
               type="text"
               value={newProjectTitle}
               onChange={(e) => setNewProjectTitle(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && createProject()}
-              placeholder="New project title"
-              className="flex-1 px-4 py-2 border border-gray-300 rounded"
+              placeholder="Project name"
+              className="flex-1 apple-input"
             />
             <button
               onClick={createProject}
-              className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              className="apple-button apple-button-primary px-8"
             >
-              Create Project
+              Create
             </button>
           </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {projects.length === 0 ? (
-            <div className="text-gray-500">No projects yet. Create one to get started.</div>
+            <div className="col-span-2 text-center py-16">
+              <p className="text-gray-500 text-lg">No projects yet</p>
+              <p className="text-gray-400 text-sm mt-2">Create your first project to get started</p>
+            </div>
           ) : (
             projects.map((project) => (
               <Link
                 key={project.id}
                 href={`/projects/${project.id}`}
-                className="block bg-white border border-gray-300 rounded-lg p-4 hover:shadow-md transition"
+                className="apple-card block group"
               >
-                <h2 className="text-xl font-semibold mb-2">{project.title}</h2>
+                <h2 className="text-xl font-semibold mb-2 text-gray-900 group-hover:text-[#007aff] transition-colors">{project.title}</h2>
                 {project.description && (
-                  <p className="text-gray-600 text-sm mb-2">{project.description}</p>
+                  <p className="text-gray-600 text-sm mb-3 leading-relaxed">{project.description}</p>
                 )}
                 <p className="text-xs text-gray-400">
-                  Created {new Date(project.createdAt).toLocaleDateString()}
+                  {new Date(project.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                 </p>
               </Link>
             ))

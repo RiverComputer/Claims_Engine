@@ -47,8 +47,8 @@ export function CommitButton({ nodeId, projectId, nodeType, status }: CommitButt
 
   if (status === "committed") {
     return (
-      <div className="text-sm text-green-600 font-medium">
-        ✓ Committed
+      <div className="text-sm text-green-600 font-medium flex items-center gap-2">
+        <span>✓</span> Committed
       </div>
     );
   }
@@ -58,12 +58,12 @@ export function CommitButton({ nodeId, projectId, nodeType, status }: CommitButt
       <button
         onClick={handleCommit}
         disabled={isCommitting}
-        className="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full apple-button apple-button-primary disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#007aff]"
       >
         {isCommitting ? "Committing..." : "Commit Node"}
       </button>
       {error && (
-        <div className="mt-2 text-sm text-red-600">
+        <div className="mt-3 text-sm text-red-600 bg-red-50 px-3 py-2 rounded-xl border border-red-200">
           {error}
         </div>
       )}

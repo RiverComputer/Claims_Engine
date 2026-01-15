@@ -8,13 +8,13 @@ interface ExportPanelProps {
 
 export function ExportPanel({ projectId }: ExportPanelProps) {
   return (
-    <div className="bg-white border border-gray-300 rounded-lg shadow-lg p-4">
-      <div className="text-sm font-semibold mb-3">Export</div>
-      <div className="text-xs text-gray-500 mb-4">
+    <div className="apple-card">
+      <div className="text-sm font-semibold mb-3 text-gray-900">Export</div>
+      <div className="text-xs text-gray-600 mb-4 leading-relaxed">
         Export committed nodes and CIDs (placeholder)
       </div>
       <button
-        className="w-full px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 text-sm"
+        className="w-full apple-button text-sm disabled:opacity-50"
         disabled
       >
         Export (Coming Soon)

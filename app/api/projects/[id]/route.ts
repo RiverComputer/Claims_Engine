@@ -8,21 +8,70 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const project = await prisma.project.findUnique({
-      where: { id },
-      include: {
-        nodes: {
-          orderBy: { createdAt: "asc" },
-        },
-        edges: true,
-        commits: {
-          orderBy: { committedAt: "desc" },
-        },
-      },
-    });
+    const url = new URL(request.url);
+    const lite = url.searchParams.get("lite") === "1";
+
+    const project = lite
+      ? await prisma.project.findUnique({
+          where: { id },
+          select: {
+            id: true,
+            title: true,
+            description: true,
+            ownerUserId: true,
+            createdAt: true,
+            updatedAt: true,
+            nodes: {
+              orderBy: { createdAt: "asc" },
+            },
+            edges: true,
+          },
+        })
+      : await prisma.project.findUnique({
+          where: { id },
+          include: {
+            nodes: {
+              orderBy: { createdAt: "asc" },
+            },
+            edges: true,
+            commits: {
+              orderBy: { committedAt: "desc" },
+            },
+          },
+        });
 
     if (!project) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    }
+
+    if (lite) {
+      const liteNodes = project.nodes.map((node) => {
+        let parsedData: any = {};
+        try {
+          parsedData = JSON.parse(node.data);
+        } catch {
+          parsedData = {};
+        }
+
+        const liteData = {
+          title: parsedData.title,
+          shortSummary: parsedData.shortSummary,
+          shortDescription: parsedData.shortDescription,
+          validatorNames: parsedData.validatorNames,
+          validationType: parsedData.validationType,
+          evidenceCID: parsedData.evidenceCID,
+          validationCID: parsedData.validationCID,
+          fileRef: parsedData.fileRef,
+          _lite: true,
+        };
+
+        return {
+          ...node,
+          data: JSON.stringify(liteData),
+        };
+      });
+
+      return NextResponse.json({ ...project, nodes: liteNodes });
     }
 
     return NextResponse.json(project);

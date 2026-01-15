@@ -2,6 +2,7 @@ import "dotenv/config";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/client";
 import { isEdgeAllowed, getEdgeType } from "@/lib/graph/edge-rules";
+import { ROOT_NODE_ID } from "@/lib/graph/root-node";
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,12 +17,57 @@ export async function POST(request: NextRequest) {
     }
 
     // Get node types
-    const fromNode = await prisma.node.findUnique({ where: { id: fromNodeId } });
-    const toNode = await prisma.node.findUnique({ where: { id: toNodeId } });
+    // Special handling for root node: if ID is ROOT_NODE_ID but not found, look up by type
+    let fromNode = await prisma.node.findUnique({ where: { id: fromNodeId } });
+    let toNode = await prisma.node.findUnique({ where: { id: toNodeId } });
+
+    // If root node not found by ID, try to find it by type
+    if (!fromNode && fromNodeId === ROOT_NODE_ID) {
+      const rootNode = await prisma.node.findFirst({
+        where: { projectId, type: "claim_root" },
+      });
+      if (rootNode) {
+        console.log(`[API] Found root node by type with ID: ${rootNode.id}, using it for fromNode`);
+        fromNode = rootNode;
+        // Update the fromNodeId to use the actual database ID
+        // We'll need to use this for the edge creation
+      }
+    }
+
+    if (!toNode && toNodeId === ROOT_NODE_ID) {
+      const rootNode = await prisma.node.findFirst({
+        where: { projectId, type: "claim_root" },
+      });
+      if (rootNode) {
+        console.log(`[API] Found root node by type with ID: ${rootNode.id}, using it for toNode`);
+        toNode = rootNode;
+        // Update the toNodeId to use the actual database ID
+      }
+    }
 
     if (!fromNode || !toNode) {
-      return NextResponse.json({ error: "Nodes not found" }, { status: 404 });
+      const missingNodes = [];
+      if (!fromNode) missingNodes.push(`fromNode (${fromNodeId})`);
+      if (!toNode) missingNodes.push(`toNode (${toNodeId})`);
+      console.error(`[API] Nodes not found: ${missingNodes.join(", ")}`);
+      console.error(`[API] Project ID: ${projectId}`);
+      
+      // Check if nodes exist with different IDs (for debugging)
+      const allNodes = await prisma.node.findMany({ where: { projectId } });
+      console.error(`[API] Total nodes in project: ${allNodes.length}`);
+      console.error(`[API] Node IDs in project:`, allNodes.map(n => ({ id: n.id, type: n.type })));
+      
+      return NextResponse.json({ 
+        error: "Nodes not found",
+        details: `Missing: ${missingNodes.join(", ")}`,
+        fromNodeId,
+        toNodeId,
+      }, { status: 404 });
     }
+
+    // Use the actual database IDs for edge creation
+    const actualFromNodeId = fromNode.id;
+    const actualToNodeId = toNode.id;
 
     // Validate edge is allowed
     if (!isEdgeAllowed(fromNode.type as any, toNode.type as any)) {
@@ -31,11 +77,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if edge already exists
+    // Check if edge already exists (using actual database IDs)
     const existing = await prisma.edge.findFirst({
       where: {
-        fromNodeId,
-        toNodeId,
+        fromNodeId: actualFromNodeId,
+        toNodeId: actualToNodeId,
         type: getEdgeType(fromNode.type as any, toNode.type as any),
       },
     });
@@ -47,8 +93,8 @@ export async function POST(request: NextRequest) {
     const edge = await prisma.edge.create({
       data: {
         projectId,
-        fromNodeId,
-        toNodeId,
+        fromNodeId: actualFromNodeId, // Use actual database ID
+        toNodeId: actualToNodeId, // Use actual database ID
         type: getEdgeType(fromNode.type as any, toNode.type as any),
         locked: false,
       },

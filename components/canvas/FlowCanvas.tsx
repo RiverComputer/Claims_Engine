@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useMemo, useEffect } from "react";
+import React, { useCallback, useMemo, useEffect, useRef } from "react";
 import ReactFlow, {
   Node,
   Edge,
@@ -12,18 +12,21 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   NodeTypes,
+  ReactFlowInstance,
 } from "reactflow";
 import "reactflow/dist/style.css";
-import { EvidenceNode, ValidationNode, ClaimNode } from "./NodeTypes";
+import { EvidenceNode, ValidationNode, ClaimNode, RootClaimNode } from "./NodeTypes";
 import { isEdgeAllowed } from "@/lib/graph/edge-rules";
 import { NodeType } from "@/lib/types/graph";
 
 // Define nodeTypes outside component to avoid React Flow warning
-const nodeTypes: NodeTypes = {
+// Using Object.freeze to ensure it's truly immutable
+const nodeTypes: NodeTypes = Object.freeze({
   evidence: EvidenceNode,
   validation: ValidationNode,
   claim: ClaimNode,
-} as const;
+  claim_root: RootClaimNode,
+}) as NodeTypes;
 
 interface FlowCanvasProps {
   initialNodes: Node[];
@@ -32,6 +35,8 @@ interface FlowCanvasProps {
   onEdgesChange: (changes: any) => void;
   onConnect: (connection: Connection) => void;
   onNodeClick?: (node: Node) => void;
+  onPaneClick?: () => void;
+  onNodeDragStop?: (event: React.MouseEvent, node: Node) => void;
 }
 
 export function FlowCanvas({
@@ -41,46 +46,83 @@ export function FlowCanvas({
   onEdgesChange,
   onConnect,
   onNodeClick,
+  onPaneClick,
+  onNodeDragStop,
 }: FlowCanvasProps) {
   const [nodes, setNodes, onNodesChangeInternal] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChangeInternal] = useEdgesState(initialEdges);
+  const reactFlowInstance = useRef<ReactFlowInstance | null>(null);
 
-  // Sync with parent when initialNodes/initialEdges change
-  // But ALWAYS preserve positions from internal state to prevent nodes from moving
-  useEffect(() => {
-    // Merge: use positions from current state, data from initialNodes
-    const mergedNodes = initialNodes.map(newNode => {
-      const existingNode = nodes.find(n => n.id === newNode.id);
-      if (existingNode) {
-        // Always preserve position from existing node
-        return {
-          ...newNode,
-          position: existingNode.position,
-        };
-      }
-      return newNode;
-    });
-    
-    // Only update if there are actual changes (new nodes or data changes)
-    const hasNewNodes = mergedNodes.length !== nodes.length;
-    const hasDataChanges = mergedNodes.some(newNode => {
-      const oldNode = nodes.find(n => n.id === newNode.id);
-      if (!oldNode) return true; // New node
-      return JSON.stringify(newNode.data) !== JSON.stringify(oldNode.data);
-    });
-    
-    if (hasNewNodes || hasDataChanges) {
-      setNodes(mergedNodes);
-    }
-  }, [initialNodes, nodes, setNodes]);
+  // Smart sync: only update when nodes are actually added/removed, preserve positions of existing nodes
+  const prevNodeIdsRef = useRef<Set<string>>(new Set());
+  const isInitialMountRef = useRef(true);
+  const prevEdgesRef = useRef<string>("");
 
   useEffect(() => {
-    const currentIds = new Set(edges.map(e => e.id));
-    const newIds = new Set(initialEdges.map(e => e.id));
-    if (currentIds.size !== newIds.size || ![...currentIds].every(id => newIds.has(id))) {
-      setEdges(initialEdges);
+    const currentNodeIds = new Set(initialNodes.map(n => n.id));
+    const prevNodeIds = prevNodeIdsRef.current;
+    
+    // On initial mount, always sync all nodes from database
+    if (isInitialMountRef.current) {
+      console.log("FlowCanvas: Initial mount - syncing all nodes from DB");
+      setNodes(initialNodes.map(n => ({ ...n })));
+      prevNodeIdsRef.current = currentNodeIds;
+      isInitialMountRef.current = false;
+      return;
     }
-  }, [initialEdges, edges, setEdges]);
+    
+    // Check if nodes were added or removed
+    const nodesAdded = initialNodes.filter(n => !prevNodeIds.has(n.id));
+    const nodesRemoved = nodes.filter(n => !currentNodeIds.has(n.id));
+    const nodesChanged = nodesAdded.length > 0 || nodesRemoved.length > 0;
+    
+    if (nodesChanged) {
+      console.log("FlowCanvas: Nodes added/removed", {
+        added: nodesAdded.length,
+        removed: nodesRemoved.length,
+        currentCount: nodes.length,
+        newCount: initialNodes.length,
+      });
+      
+      // For new nodes, use their positions from initialNodes
+      // For existing nodes, preserve their current React Flow positions (user may have moved them)
+      setNodes((prevNodes) => {
+        const nodeMap = new Map(prevNodes.map(n => [n.id, n]));
+        
+        // Update with new nodes or nodes from initialNodes
+        return initialNodes.map(initialNode => {
+          const existingNode = nodeMap.get(initialNode.id);
+          
+          if (existingNode) {
+            // Node exists - preserve its current position (user may have moved it)
+            return {
+              ...existingNode,
+              data: initialNode.data, // Update data but keep position
+            };
+          } else {
+            // New node - use position from initialNodes
+            return { ...initialNode };
+          }
+        });
+      });
+      
+      prevNodeIdsRef.current = currentNodeIds;
+    }
+  }, [initialNodes]); // Only depend on initialNodes, not nodes (to avoid circular updates)
+
+  useEffect(() => {
+    // Create a signature of edge IDs to detect changes
+    const edgesSignature = initialEdges.map(e => e.id).sort().join(',');
+    
+    if (edgesSignature !== prevEdgesRef.current) {
+      console.log("FlowCanvas: Syncing edges from DB", {
+        currentCount: edges.length,
+        newCount: initialEdges.length,
+      });
+      setEdges(initialEdges.map(e => ({ ...e })));
+      prevEdgesRef.current = edgesSignature;
+    }
+  }, [initialEdges]); // Sync when initialEdges change
 
   // Handle node changes (position updates)
   const handleNodesChange = useCallback(
@@ -127,8 +169,10 @@ export function FlowCanvas({
     [nodes, onConnect]
   );
 
-  // Memoize nodeTypes to ensure stable reference and avoid React Flow warning
-  const memoizedNodeTypes = useMemo(() => nodeTypes, []);
+  // nodeTypes is already defined outside component and frozen, so it's stable
+  // No need to memoize since it's a constant
+
+  // Removed automatic fitView - user controls view manually via Controls component
 
   return (
     <div style={{ width: "100%", height: "100vh" }}>
@@ -138,16 +182,54 @@ export function FlowCanvas({
         onNodesChange={handleNodesChange}
         onEdgesChange={handleEdgesChange}
         onConnect={handleConnect}
-        onNodeClick={onNodeClick}
-        nodeTypes={memoizedNodeTypes}
+        onInit={(instance) => {
+          reactFlowInstance.current = instance;
+        }}
+        onNodeClick={(event, node) => {
+          console.log("FlowCanvas: Node clicked", node.id);
+          if (onNodeClick) {
+            onNodeClick(node);
+          }
+        }}
+        onPaneClick={(event) => {
+          console.log("FlowCanvas: Pane clicked (blank canvas)");
+          if (onPaneClick) {
+            onPaneClick();
+          }
+        }}
+        onNodeDragStop={onNodeDragStop}
+        nodeTypes={nodeTypes}
         fitView={false}
+        minZoom={0.01}
+        maxZoom={4}
         nodesDraggable={true}
         nodesConnectable={true}
         elementsSelectable={true}
       >
-        <Background />
-        <Controls />
-        <MiniMap />
+        <Background 
+          color="#e5e5e7" 
+          gap={20}
+          size={1}
+        />
+        <Controls 
+          style={{
+            button: {
+              backgroundColor: 'white',
+              border: '1px solid rgba(0, 0, 0, 0.1)',
+              borderRadius: '8px',
+              color: '#1d1d1f',
+            }
+          }}
+        />
+        <MiniMap 
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.8)',
+            border: '1px solid rgba(0, 0, 0, 0.1)',
+            borderRadius: '12px',
+          }}
+          nodeColor="#007aff"
+          maskColor="rgba(0, 0, 0, 0.05)"
+        />
       </ReactFlow>
     </div>
   );

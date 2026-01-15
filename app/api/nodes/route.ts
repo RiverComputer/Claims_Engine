@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/client";
 import { NodeType } from "@/lib/types/graph";
@@ -5,7 +6,7 @@ import { NodeType } from "@/lib/types/graph";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { projectId, type, positionX, positionY, data } = body;
+    const { projectId, type, positionX, positionY, data, id } = body;
 
     if (!projectId || !type || positionX === undefined || positionY === undefined || !data) {
       return NextResponse.json(
@@ -15,25 +16,40 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate type
-    if (!["evidence", "validation", "claim"].includes(type)) {
+    if (!["evidence", "validation", "claim", "claim_root"].includes(type)) {
       return NextResponse.json({ error: "Invalid node type" }, { status: 400 });
     }
 
+    // For root node, use the hardcoded ID; otherwise let Prisma generate a UUID
+    const nodeData: any = {
+      projectId,
+      type: type as NodeType,
+      positionX: parseFloat(positionX),
+      positionY: parseFloat(positionY),
+      data: JSON.stringify(data),
+      status: "draft",
+    };
+
+    // If a custom ID is provided (e.g., for root node), use it
+    if (id) {
+      nodeData.id = id;
+    }
+
     const node = await prisma.node.create({
-      data: {
-        projectId,
-        type: type as NodeType,
-        positionX: parseFloat(positionX),
-        positionY: parseFloat(positionY),
-        data: JSON.stringify(data),
-        status: "draft",
-      },
+      data: nodeData,
     });
 
     return NextResponse.json(node, { status: 201 });
   } catch (error: any) {
     console.error("Error creating node:", error);
-    return NextResponse.json({ error: "Failed to create node" }, { status: 500 });
+    console.error("Error stack:", error?.stack);
+    return NextResponse.json(
+      { 
+        error: "Failed to create node",
+        details: error?.message || String(error),
+      },
+      { status: 500 }
+    );
   }
 }
 
