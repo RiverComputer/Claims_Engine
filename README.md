@@ -40,6 +40,22 @@ npm run dev
 
 4. Open [http://localhost:3000](http://localhost:3000)
 
+## Seeding Obuntu pilot data
+
+Use the shared Obuntu pilot bundle to populate the graphs without local data.
+
+1. Set the data URL (expects a downloadable `.zip` that contains a `raw-data/` folder):
+```bash
+export OBUNTU_PILOT_URL="https://drive.google.com/uc?export=download&id=FILE_ID"
+```
+
+2. Run the seed script:
+```bash
+npm run seed:obuntu
+```
+
+The seed script downloads the archive, extracts it under `.cache/obuntu-pilot-project/`, then runs the import scripts. You can also override the data root for imports by setting `PILOT_PROJECT_DIR` in your environment.
+
 ## Usage
 
 1. Create a new project from the home page

@@ -10,7 +10,8 @@
     "db:migrate": "prisma migrate dev",
     "db:generate": "prisma generate",
     "import:obuntu": "tsx scripts/import-obuntu-resets.ts",
-    "import:nv-mapping": "tsx scripts/import-nv-mapping.ts"
+    "import:nv-mapping": "tsx scripts/import-nv-mapping.ts",
+    "seed:obuntu": "tsx scripts/seed-obuntu.ts"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "7.1.0",

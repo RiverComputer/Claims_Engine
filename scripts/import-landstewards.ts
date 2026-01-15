@@ -13,7 +13,14 @@ import { randomUUID } from "crypto";
 import { generatePdfThumbnail, generateExcelThumbnail } from "../lib/utils/thumbnail-generator";
 
 const UPLOADS_DIR = path.join(process.cwd(), "uploads");
-const RAW_DATA_DIR = path.join(process.cwd(), "..", "pilot-project", "raw-data", "Events  2", "Conference of Landstewards");
+const PILOT_PROJECT_DIR =
+  process.env.PILOT_PROJECT_DIR || path.join(process.cwd(), "..", "pilot-project");
+const RAW_DATA_DIR = path.join(
+  PILOT_PROJECT_DIR,
+  "raw-data",
+  "Events  2",
+  "Conference of Landstewards"
+);
 
 async function ensureUploadsDir() {
   try {

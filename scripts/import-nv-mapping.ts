@@ -12,7 +12,9 @@ import { copyFile, readFile } from "fs/promises";
 import { randomUUID } from "crypto";
 
 const UPLOADS_DIR = path.join(process.cwd(), "uploads");
-const RAW_DATA_DIR = path.join(process.cwd(), "..", "pilot-project", "raw-data", "NV_Mapping_Example");
+const PILOT_PROJECT_DIR =
+  process.env.PILOT_PROJECT_DIR || path.join(process.cwd(), "..", "pilot-project");
+const RAW_DATA_DIR = path.join(PILOT_PROJECT_DIR, "raw-data", "NV_Mapping_Example");
 
 // Define validation subclaims and their associated evidence files
 const VALIDATION_STRUCTURE = [
