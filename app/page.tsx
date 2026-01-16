@@ -14,6 +14,10 @@ export default function HomePage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [newProjectTitle, setNewProjectTitle] = useState("");
+  const [importTitle, setImportTitle] = useState("");
+  const [importUrl, setImportUrl] = useState("");
+  const [importing, setImporting] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchProjects();
@@ -55,6 +59,38 @@ export default function HomePage() {
     }
   };
 
+  const importProject = async () => {
+    if (!importTitle.trim() || !importUrl.trim()) return;
+    setImporting(true);
+    setImportError(null);
+
+    try {
+      const response = await fetch("/api/projects/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: importTitle.trim(),
+          url: importUrl.trim(),
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Import failed");
+      }
+
+      const result = await response.json();
+      if (result?.projectId) {
+        window.location.href = `/projects/${result.projectId}`;
+      }
+    } catch (error: any) {
+      console.error("Error importing project:", error);
+      setImportError(error?.message || "Import failed");
+    } finally {
+      setImporting(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center bg-[#f5f5f7]">
@@ -72,7 +108,7 @@ export default function HomePage() {
         <h1 className="text-5xl font-semibold mb-3 text-gray-900 tracking-tight">Claims Engine</h1>
         <p className="text-xl text-gray-600 mb-12">Build and manage your claims</p>
 
-        <div className="mb-12">
+        <div className="mb-8">
           <div className="flex gap-3">
             <input
               type="text"
@@ -88,6 +124,38 @@ export default function HomePage() {
             >
               Create
             </button>
+          </div>
+        </div>
+
+        <div className="mb-12">
+          <div className="flex flex-col gap-3">
+            <input
+              type="text"
+              value={importTitle}
+              onChange={(e) => setImportTitle(e.target.value)}
+              placeholder="Project name (import)"
+              className="apple-input"
+            />
+            <div className="flex gap-3">
+              <input
+                type="text"
+                value={importUrl}
+                onChange={(e) => setImportUrl(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && importProject()}
+                placeholder="Drive link to a ZIP folder"
+                className="flex-1 apple-input"
+              />
+              <button
+                onClick={importProject}
+                disabled={importing}
+                className="apple-button px-6"
+              >
+                {importing ? "Importing..." : "Import"}
+              </button>
+            </div>
+            {importError && (
+              <div className="text-sm text-red-600">{importError}</div>
+            )}
           </div>
         </div>
 

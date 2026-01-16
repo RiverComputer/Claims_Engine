@@ -601,15 +601,17 @@ export default function ProjectPage() {
           />
         </div>
       </div>
-      <div className="w-64 bg-white/60 backdrop-blur-xl border-l border-gray-200/50 p-4 space-y-4 overflow-y-auto">
+      <div className="w-48 bg-white/60 backdrop-blur-xl border-l border-gray-200/50 p-3 space-y-4 overflow-y-auto">
         <NodePalette onAddNode={handleAddNode} />
         <ExportPanel projectId={projectId} />
       </div>
-      <InspectorPanel
-        selectedNode={selectedNode}
-        onUpdateNode={handleUpdateNode}
-        projectId={projectId}
-      />
+      {selectedNode && (
+        <InspectorPanel
+          selectedNode={selectedNode}
+          onUpdateNode={handleUpdateNode}
+          projectId={projectId}
+        />
+      )}
       <MintModal
         isOpen={isMintModalOpen}
         onClose={() => setIsMintModalOpen(false)}
