@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       );
       const connectedEvidence = evidenceNodes
         .map((n: any) => n?.cid)
-        .filter((cid): cid is string => cid !== null && cid !== undefined);
+        .filter((cid: string | null | undefined): cid is string => cid !== null && cid !== undefined);
       
       nodeData.evidenceCID = [...new Set([...(nodeData.evidenceCID || []), ...connectedEvidence])];
     }
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
       );
       const connectedEvidence = evidenceNodes
         .map((n: any) => n?.cid)
-        .filter((cid): cid is string => cid !== null && cid !== undefined);
+        .filter((cid: string | null | undefined): cid is string => cid !== null && cid !== undefined);
 
       const validationEdges = node.edgesTo.filter((e: any) => e.type === "validates");
       const validationNodes = await Promise.all(
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
       );
       const connectedValidation = validationNodes
         .map((n: any) => n?.cid)
-        .filter((cid): cid is string => cid !== null && cid !== undefined);
+        .filter((cid: string | null | undefined): cid is string => cid !== null && cid !== undefined);
 
       nodeData.evidenceCID = [...new Set([...(nodeData.evidenceCID || []), ...connectedEvidence])];
       nodeData.validationCID = [...new Set([...(nodeData.validationCID || []), ...connectedValidation])];
