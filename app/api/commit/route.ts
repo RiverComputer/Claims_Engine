@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
         evidenceEdges.map((e: any) => prisma.node.findUnique({ where: { id: e.fromNodeId } }))
       );
       const connectedEvidence = evidenceNodes
-        .map((n) => n?.cid)
+        .map((n: any) => n?.cid)
         .filter((cid): cid is string => cid !== null && cid !== undefined);
       
       nodeData.evidenceCID = [...new Set([...(nodeData.evidenceCID || []), ...connectedEvidence])];
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
         evidenceEdges.map((e: any) => prisma.node.findUnique({ where: { id: e.fromNodeId } }))
       );
       const connectedEvidence = evidenceNodes
-        .map((n) => n?.cid)
+        .map((n: any) => n?.cid)
         .filter((cid): cid is string => cid !== null && cid !== undefined);
 
       const validationEdges = node.edgesTo.filter((e: any) => e.type === "validates");
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
         validationEdges.map((e: any) => prisma.node.findUnique({ where: { id: e.fromNodeId } }))
       );
       const connectedValidation = validationNodes
-        .map((n) => n?.cid)
+        .map((n: any) => n?.cid)
         .filter((cid): cid is string => cid !== null && cid !== undefined);
 
       nodeData.evidenceCID = [...new Set([...(nodeData.evidenceCID || []), ...connectedEvidence])];
