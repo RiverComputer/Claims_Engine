@@ -273,7 +273,7 @@ def main():
 
     lines.append("COMMIT;")
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    OUT_PATH.write_text("\\n".join(lines))
+    OUT_PATH.write_text("\n".join(lines))
     print(f"Wrote seed SQL to {OUT_PATH}")
 
 
