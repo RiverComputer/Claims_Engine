@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate type
-    if (!["evidence", "validation", "claim", "claim_root"].includes(type)) {
+    if (!["evidence", "validation", "claim", "claim_root", "shape", "text"].includes(type)) {
       return NextResponse.json({ error: "Invalid node type" }, { status: 400 });
     }
 
