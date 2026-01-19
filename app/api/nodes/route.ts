@@ -9,8 +9,9 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { projectId, type, positionX, positionY, data, id } = body;
+    const allowEmptyData = type === "shape" || type === "text";
 
-    if (!projectId || !type || positionX === undefined || positionY === undefined || !data) {
+    if (!projectId || !type || positionX === undefined || positionY === undefined || (!data && !allowEmptyData)) {
       return NextResponse.json(
         { error: "projectId, type, positionX, positionY, and data are required" },
         { status: 400 }
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
       type: type as NodeType,
       positionX: parseFloat(positionX),
       positionY: parseFloat(positionY),
-      data: JSON.stringify(data),
+      data: JSON.stringify(data ?? {}),
       status: "draft",
     };
 

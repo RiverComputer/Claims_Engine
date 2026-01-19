@@ -153,6 +153,24 @@ export function EvidenceForm({ data, onChange }: EvidenceFormProps) {
             </div>
           )}
         </div>
+        {(formData.thumbnailRef || formData.fileRef) && (
+          <div className="mt-4">
+            <label className="block text-xs font-medium text-gray-600 mb-2">Preview</label>
+            <a
+              href={formData.fileRef || formData.thumbnailRef}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block overflow-hidden rounded-xl border border-gray-200 bg-gray-50"
+            >
+              <img
+                src={formData.thumbnailRef || formData.fileRef}
+                alt={formData.title || "Evidence preview"}
+                className="w-full h-48 object-contain bg-white"
+                loading="lazy"
+              />
+            </a>
+          </div>
+        )}
       </div>
       <div>
         <label className="block text-sm font-medium mb-2 text-gray-700">Short Description</label>
