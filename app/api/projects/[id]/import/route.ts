@@ -10,6 +10,7 @@ import { copyFile } from "fs/promises";
 import { randomUUID } from "crypto";
 
 const UPLOADS_DIR = path.join(process.cwd(), "uploads");
+export const runtime = "nodejs";
 
 async function ensureUploadsDir() {
   try {

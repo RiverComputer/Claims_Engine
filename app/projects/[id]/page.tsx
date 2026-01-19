@@ -10,6 +10,7 @@ import { ExportPanel } from "@/components/export/ExportPanel";
 import { MintModal } from "@/components/mint/MintModal";
 import { NodeType, NodeData } from "@/lib/types/graph";
 import { getEdgeType } from "@/lib/graph/edge-rules";
+import { applySmartLayout } from "@/lib/layout/auto-layout";
 // Auto-layout removed for stability
 // Force layout removed for stability
 

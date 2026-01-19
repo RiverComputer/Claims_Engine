@@ -1,6 +1,8 @@
 import "dotenv/config";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/client";
+
+export const runtime = "nodejs";
 import { NodeType } from "@/lib/types/graph";
 
 export async function POST(request: NextRequest) {

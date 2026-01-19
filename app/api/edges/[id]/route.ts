@@ -2,6 +2,8 @@ import "dotenv/config";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/client";
 
+export const runtime = "nodejs";
+
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

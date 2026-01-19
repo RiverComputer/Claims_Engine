@@ -13,6 +13,7 @@ interface CustomNodeData {
   image?: string; // For Claim nodes - may contain image data URL
   color?: string; // Optional custom node color (hex)
   fileRef?: string;
+  thumbnailRef?: string;
   _lite?: boolean;
   shape?: "rectangle" | "ellipse";
   width?: number;

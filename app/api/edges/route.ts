@@ -4,6 +4,8 @@ import { prisma } from "@/lib/db/client";
 import { isEdgeAllowed, getEdgeType } from "@/lib/graph/edge-rules";
 import { ROOT_NODE_ID } from "@/lib/graph/root-node";
 
+export const runtime = "nodejs";
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -55,7 +57,7 @@ export async function POST(request: NextRequest) {
       // Check if nodes exist with different IDs (for debugging)
       const allNodes = await prisma.node.findMany({ where: { projectId } });
       console.error(`[API] Total nodes in project: ${allNodes.length}`);
-      console.error(`[API] Node IDs in project:`, allNodes.map(n => ({ id: n.id, type: n.type })));
+      console.error(`[API] Node IDs in project:`, allNodes.map((n: any) => ({ id: n.id, type: n.type })));
       
       return NextResponse.json({ 
         error: "Nodes not found",

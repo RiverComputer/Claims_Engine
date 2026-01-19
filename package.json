@@ -16,6 +16,7 @@
     "seed:obuntu": "tsx scripts/seed-obuntu.ts"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.1.0",
     "@prisma/client": "7.1.0",
     "@types/d3-force": "^3.0.10",
     "@types/dagre": "^0.7.53",
@@ -27,6 +28,7 @@
     "@vercel/blob": "^0.24.1",
     "next": "16.0.10",
     "pdfjs-dist": "^5.4.530",
+    "pg": "^8.12.0",
     "react": "19.2.1",
     "react-dom": "19.2.1",
     "reactflow": "^11.11.4",
@@ -35,6 +37,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/pg": "^8.11.11",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "dotenv": "^17.2.3",

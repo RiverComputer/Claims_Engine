@@ -148,7 +148,8 @@ export function useForceLayout(
       
       // Update existing simulation with pinned nodes
       simulationRef.current.nodes(simNodes);
-      simulationRef.current.force<SimLink>("link")?.links(simLinks);
+      const linkForce = simulationRef.current.force("link") as any;
+      linkForce?.links(simLinks);
       
       if (isNewNodeAddition) {
         // DON'T restart the simulation - just let it continue naturally

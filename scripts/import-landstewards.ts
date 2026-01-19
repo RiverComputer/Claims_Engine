@@ -65,8 +65,9 @@ async function copyFileToUploads(sourcePath: string, filename: string): Promise<
     } else if (isPdf) {
       // For PDFs, generate thumbnail from first page
       try {
-        dataUrl = await generatePdfThumbnail(sourcePath);
-        if (dataUrl) {
+        const pdfThumb = await generatePdfThumbnail(sourcePath);
+        if (pdfThumb) {
+          dataUrl = pdfThumb;
           console.log(`  ✓ Generated PDF thumbnail for ${filename}`);
         }
       } catch (error) {
@@ -75,8 +76,9 @@ async function copyFileToUploads(sourcePath: string, filename: string): Promise<
     } else if (isExcel) {
       // For Excel files, generate thumbnail from first sheet
       try {
-        dataUrl = await generateExcelThumbnail(sourcePath);
-        if (dataUrl) {
+        const excelThumb = await generateExcelThumbnail(sourcePath);
+        if (excelThumb) {
+          dataUrl = excelThumb;
           console.log(`  ✓ Generated Excel thumbnail for ${filename}`);
         }
       } catch (error) {

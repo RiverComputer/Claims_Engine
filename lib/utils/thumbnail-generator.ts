@@ -55,7 +55,7 @@ export async function generatePdfThumbnail(
     await page.render({
       canvasContext: context as any,
       viewport: scaledViewport,
-    }).promise;
+    } as any).promise;
 
     // Convert canvas to data URL
     const dataUrl = canvas.toDataURL("image/png");

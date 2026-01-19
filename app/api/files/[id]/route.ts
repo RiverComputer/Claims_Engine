@@ -76,7 +76,7 @@ export async function GET(
         context.drawImage(image, 0, 0, width, height);
 
         const thumbBuffer = canvas.toBuffer("image/jpeg", { quality: 0.75 });
-        return new NextResponse(thumbBuffer, {
+        return new NextResponse(new Uint8Array(thumbBuffer), {
           headers: {
             "Content-Type": "image/jpeg",
             "Cache-Control": "public, max-age=31536000, immutable",
@@ -90,7 +90,7 @@ export async function GET(
     // Read and return file
     const fileBuffer = await readFile(filepath);
 
-    return new NextResponse(fileBuffer, {
+    return new NextResponse(new Uint8Array(fileBuffer), {
       headers: {
         "Content-Type": contentType,
         "Content-Disposition": `inline; filename="${file}"`,

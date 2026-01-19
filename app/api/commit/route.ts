@@ -4,6 +4,8 @@ import { MockAdapter } from "@/lib/commit/mock";
 import { validateCommit } from "@/lib/graph/commit-gating";
 import { GraphNode, GraphEdge } from "@/lib/types/graph";
 
+export const runtime = "nodejs";
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -38,9 +40,9 @@ export async function POST(request: NextRequest) {
 
     // For Validation and Claim nodes, populate CID arrays from connected edges
     if (node.type === "validation") {
-      const evidenceEdges = node.edgesTo.filter((e) => e.type === "references");
+      const evidenceEdges = node.edgesTo.filter((e: any) => e.type === "references");
       const evidenceNodes = await Promise.all(
-        evidenceEdges.map((e) => prisma.node.findUnique({ where: { id: e.fromNodeId } }))
+        evidenceEdges.map((e: any) => prisma.node.findUnique({ where: { id: e.fromNodeId } }))
       );
       const connectedEvidence = evidenceNodes
         .map((n) => n?.cid)
@@ -50,17 +52,17 @@ export async function POST(request: NextRequest) {
     }
 
     if (node.type === "claim") {
-      const evidenceEdges = node.edgesTo.filter((e) => e.type === "includes");
+      const evidenceEdges = node.edgesTo.filter((e: any) => e.type === "includes");
       const evidenceNodes = await Promise.all(
-        evidenceEdges.map((e) => prisma.node.findUnique({ where: { id: e.fromNodeId } }))
+        evidenceEdges.map((e: any) => prisma.node.findUnique({ where: { id: e.fromNodeId } }))
       );
       const connectedEvidence = evidenceNodes
         .map((n) => n?.cid)
         .filter((cid): cid is string => cid !== null && cid !== undefined);
 
-      const validationEdges = node.edgesTo.filter((e) => e.type === "validates");
+      const validationEdges = node.edgesTo.filter((e: any) => e.type === "validates");
       const validationNodes = await Promise.all(
-        validationEdges.map((e) => prisma.node.findUnique({ where: { id: e.fromNodeId } }))
+        validationEdges.map((e: any) => prisma.node.findUnique({ where: { id: e.fromNodeId } }))
       );
       const connectedValidation = validationNodes
         .map((n) => n?.cid)
