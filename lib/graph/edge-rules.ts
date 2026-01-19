@@ -4,6 +4,9 @@ import { NodeType } from "@/lib/types/graph";
  * Check if an edge connection is allowed
  */
 export function isEdgeAllowed(fromType: NodeType, toType: NodeType): boolean {
+  if (fromType === "shape" || fromType === "text" || toType === "shape" || toType === "text") {
+    return false;
+  }
   // Allowed edges:
   // - Evidence → Validation
   // - Validation → Claim (including claim_root)

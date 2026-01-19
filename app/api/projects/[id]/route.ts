@@ -62,6 +62,17 @@ export async function GET(
           evidenceCID: parsedData.evidenceCID,
           validationCID: parsedData.validationCID,
           fileRef: parsedData.fileRef,
+          text: parsedData.text,
+          fontSize: parsedData.fontSize,
+          align: parsedData.align,
+          width: parsedData.width,
+          height: parsedData.height,
+          shape: parsedData.shape,
+          fill: parsedData.fill,
+          stroke: parsedData.stroke,
+          strokeWidth: parsedData.strokeWidth,
+          borderRadius: parsedData.borderRadius,
+          color: parsedData.color,
           _lite: true,
         };
 

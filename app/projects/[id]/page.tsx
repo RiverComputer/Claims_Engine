@@ -53,7 +53,7 @@ export default function ProjectPage() {
       // The database positions are what were last saved when the user moved nodes
       const flowNodes: Node[] = (data.nodes || []).map((n: any) => {
         const nodeData = JSON.parse(n.data);
-        const label = nodeData.title || nodeData.shortSummary || "";
+        const label = nodeData.title || nodeData.shortSummary || nodeData.text || "";
         
         // ALWAYS use position from database - it represents the last saved state
         // On page refresh, nodes will be empty, so we use DB positions
@@ -181,6 +181,21 @@ export default function ProjectPage() {
       defaultData.shortDescription = "";
       defaultData.evidenceCID = [];
       defaultData.validationCID = [];
+    } else if (type === "shape") {
+      defaultData.shape = "rectangle";
+      defaultData.width = 220;
+      defaultData.height = 140;
+      defaultData.fill = "rgba(148, 163, 184, 0.2)";
+      defaultData.stroke = "rgba(71, 85, 105, 0.6)";
+      defaultData.strokeWidth = 2;
+      defaultData.borderRadius = 16;
+    } else if (type === "text") {
+      defaultData.text = "Text";
+      defaultData.fontSize = 16;
+      defaultData.color = "#111827";
+      defaultData.width = 220;
+      defaultData.height = 120;
+      defaultData.align = "left";
     }
 
     try {
@@ -311,7 +326,27 @@ export default function ProjectPage() {
         }
       }
     }
-  }, [selectedNode]);
+  }, [selectedNode, nodes]);
+
+  const handleSelectionDragStop = useCallback(async (movedNodes: Node[]) => {
+    if (!movedNodes || movedNodes.length === 0) return;
+
+    try {
+      const updates = movedNodes.map((node) =>
+        fetch(`/api/nodes/${node.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            positionX: node.position.x,
+            positionY: node.position.y,
+          }),
+        })
+      );
+      await Promise.all(updates);
+    } catch (error) {
+      console.error("Error saving selection positions:", error);
+    }
+  }, []);
 
   const handleEdgesChange = (changes: any) => {
     // Handle edge deletions
@@ -598,6 +633,7 @@ export default function ProjectPage() {
               setSelectedNode(null);
             }}
             onNodeDragStop={handleNodeDragStop}
+            onSelectionDragStop={handleSelectionDragStop}
           />
         </div>
       </div>

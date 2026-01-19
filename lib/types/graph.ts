@@ -1,4 +1,4 @@
-export type NodeType = "evidence" | "validation" | "claim" | "claim_root";
+export type NodeType = "evidence" | "validation" | "claim" | "claim_root" | "shape" | "text";
 export type NodeStatus = "draft" | "committed";
 
 export interface EvidenceData {
@@ -42,7 +42,28 @@ export interface ClaimData {
   createdAt: string;
 }
 
-export type NodeData = EvidenceData | ValidationData | ClaimData;
+export interface ShapeData {
+  shape: "rectangle" | "ellipse";
+  width?: number;
+  height?: number;
+  fill?: string;
+  stroke?: string;
+  strokeWidth?: number;
+  borderRadius?: number;
+  createdAt: string;
+}
+
+export interface TextData {
+  text: string;
+  fontSize?: number;
+  color?: string;
+  width?: number;
+  height?: number;
+  align?: "left" | "center" | "right";
+  createdAt: string;
+}
+
+export type NodeData = EvidenceData | ValidationData | ClaimData | ShapeData | TextData;
 
 export interface GraphNode {
   id: string;

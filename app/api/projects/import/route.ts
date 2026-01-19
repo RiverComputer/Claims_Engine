@@ -55,21 +55,6 @@ function toTitle(filename: string) {
     .join(" ");
 }
 
-function createDataUrl(filePath: string) {
-  const ext = extname(filePath).slice(1).toLowerCase();
-  const mimeMap: Record<string, string> = {
-    jpg: "image/jpeg",
-    jpeg: "image/jpeg",
-    png: "image/png",
-    gif: "image/gif",
-    webp: "image/webp",
-  };
-  const mimeType = mimeMap[ext];
-  if (!mimeType) return null;
-  const buffer = readFileSync(filePath);
-  return `data:${mimeType};base64,${buffer.toString("base64")}`;
-}
-
 async function convertHeicToJpegBuffer(filePath: string) {
   const inputBuffer = readFileSync(filePath);
   return heicConvert({
@@ -225,14 +210,11 @@ export async function POST(request: NextRequest) {
       const destFilename = `${fileId}${destExt}`;
       const destPath = join(UPLOADS_DIR, destFilename);
 
-      let dataUrl: string | null = null;
       if (isHeic) {
         const jpegBuffer = await convertHeicToJpegBuffer(filePath);
         writeFileSync(destPath, jpegBuffer);
-        dataUrl = `data:image/jpeg;base64,${jpegBuffer.toString("base64")}`;
       } else {
         copyFileSync(filePath, destPath);
-        dataUrl = createDataUrl(filePath);
       }
 
       const title = toTitle(filePath);
@@ -244,7 +226,7 @@ export async function POST(request: NextRequest) {
 
       const data = {
         title,
-        content: dataUrl || `Evidence file: ${basename(filePath)}`,
+        content: `Evidence file: ${basename(filePath)}`,
         shortDescription: `Imported from Drive: ${basename(filePath)}`,
         fileRef: `/api/files/${fileId}`,
         createdAt: new Date().toISOString(),

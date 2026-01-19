@@ -6,6 +6,8 @@ import { NodeType, NodeData } from "@/lib/types/graph";
 import { EvidenceForm } from "./EvidenceForm";
 import { ValidationForm } from "./ValidationForm";
 import { ClaimForm } from "./ClaimForm";
+import { ShapeForm } from "./ShapeForm";
+import { TextForm } from "./TextForm";
 import { CommitButton } from "../commit/CommitButton";
 
 interface InspectorPanelProps {
@@ -113,13 +115,25 @@ export function InspectorPanel({
   const isCommitted = nodeStatus === "committed";
   const cid = (selectedNode.data as any)?.cid;
   const attestationUID = (selectedNode.data as any)?.attestationUID;
+  const canCommit =
+    nodeType === "evidence" ||
+    nodeType === "validation" ||
+    nodeType === "claim" ||
+    nodeType === "claim_root";
   const defaultColorByType: Record<NodeType, string> = {
     evidence: "rgb(37, 99, 235)",
     validation: "rgb(34, 197, 94)",
     claim: "rgb(168, 85, 247)",
     claim_root: "rgb(168, 85, 247)",
+    shape: "rgba(71, 85, 105, 0.6)",
+    text: "#111827",
   };
   const currentColor = (localData as any).color || defaultColorByType[nodeType];
+  const showNodeColor =
+    nodeType === "evidence" ||
+    nodeType === "validation" ||
+    nodeType === "claim" ||
+    nodeType === "claim_root";
 
   const handleFormChange = (data: NodeData) => {
     // Preserve status when updating
@@ -209,35 +223,37 @@ export function InspectorPanel({
             Unsaved changes
           </div>
         )}
-        <div className="mb-5 p-3 rounded-xl bg-gray-50 border border-gray-200">
-          <div className="flex items-center justify-between mb-2">
-            <label className="text-xs font-medium text-gray-700">Node Color</label>
-            {(localData as any).color && (
-              <button
-                type="button"
-                onClick={handleClearColor}
-                className="text-xs text-gray-500 hover:text-gray-700"
-              >
-                Reset
-              </button>
-            )}
+        {showNodeColor && (
+          <div className="mb-5 p-3 rounded-xl bg-gray-50 border border-gray-200">
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-xs font-medium text-gray-700">Node Color</label>
+              {(localData as any).color && (
+                <button
+                  type="button"
+                  onClick={handleClearColor}
+                  className="text-xs text-gray-500 hover:text-gray-700"
+                >
+                  Reset
+                </button>
+              )}
+            </div>
+            <div className="flex items-center gap-3">
+              <input
+                type="color"
+                value={currentColor}
+                onChange={(e) => handleColorChange(e.target.value)}
+                className="h-8 w-12 rounded-md border border-gray-300 bg-white"
+              />
+              <input
+                type="text"
+                value={currentColor}
+                onChange={(e) => handleColorChange(e.target.value)}
+                className="apple-input text-xs font-mono"
+                placeholder="#RRGGBB"
+              />
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <input
-              type="color"
-              value={currentColor}
-              onChange={(e) => handleColorChange(e.target.value)}
-              className="h-8 w-12 rounded-md border border-gray-300 bg-white"
-            />
-            <input
-              type="text"
-              value={currentColor}
-              onChange={(e) => handleColorChange(e.target.value)}
-              className="apple-input text-xs font-mono"
-              placeholder="#RRGGBB"
-            />
-          </div>
-        </div>
+        )}
       </div>
 
             {nodeType === "evidence" && (
@@ -261,6 +277,20 @@ export function InspectorPanel({
                 onChange={handleFormChange}
               />
             )}
+            {nodeType === "shape" && (
+              <ShapeForm
+                key={selectedNode.id}
+                data={localData}
+                onChange={handleFormChange}
+              />
+            )}
+            {nodeType === "text" && (
+              <TextForm
+                key={selectedNode.id}
+                data={localData}
+                onChange={handleFormChange}
+              />
+            )}
 
             <div className="mt-8 pt-6 border-t border-gray-200 space-y-3">
               <button
@@ -270,7 +300,7 @@ export function InspectorPanel({
               >
                 {isSaving ? "Saving..." : isCommitted ? "Save Changes" : "Save Draft"}
               </button>
-              {!isCommitted && (
+              {!isCommitted && canCommit && (
                 <CommitButton
                   nodeId={selectedNode.id}
                   projectId={projectId}

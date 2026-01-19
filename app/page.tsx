@@ -18,6 +18,7 @@ export default function HomePage() {
   const [importUrl, setImportUrl] = useState("");
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
+  const [showImport, setShowImport] = useState(false);
 
   useEffect(() => {
     fetchProjects();
@@ -124,40 +125,48 @@ export default function HomePage() {
             >
               Create
             </button>
+            <button
+              onClick={() => setShowImport((prev) => !prev)}
+              className="apple-button px-6"
+            >
+              Import
+            </button>
           </div>
         </div>
 
-        <div className="mb-12">
-          <div className="flex flex-col gap-3">
-            <input
-              type="text"
-              value={importTitle}
-              onChange={(e) => setImportTitle(e.target.value)}
-              placeholder="Project name (import)"
-              className="apple-input"
-            />
-            <div className="flex gap-3">
+        {showImport && (
+          <div className="mb-12">
+            <div className="flex flex-col gap-3">
               <input
                 type="text"
-                value={importUrl}
-                onChange={(e) => setImportUrl(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && importProject()}
-                placeholder="Drive link to a ZIP folder"
-                className="flex-1 apple-input"
+                value={importTitle}
+                onChange={(e) => setImportTitle(e.target.value)}
+                placeholder="Project name (import)"
+                className="apple-input"
               />
-              <button
-                onClick={importProject}
-                disabled={importing}
-                className="apple-button px-6"
-              >
-                {importing ? "Importing..." : "Import"}
-              </button>
+              <div className="flex gap-3">
+                <input
+                  type="text"
+                  value={importUrl}
+                  onChange={(e) => setImportUrl(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && importProject()}
+                  placeholder="Drive link to a ZIP folder"
+                  className="flex-1 apple-input"
+                />
+                <button
+                  onClick={importProject}
+                  disabled={importing}
+                  className="apple-button px-6"
+                >
+                  {importing ? "Importing..." : "Import"}
+                </button>
+              </div>
+              {importError && (
+                <div className="text-sm text-red-600">{importError}</div>
+              )}
             </div>
-            {importError && (
-              <div className="text-sm text-red-600">{importError}</div>
-            )}
           </div>
-        </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {projects.length === 0 ? (

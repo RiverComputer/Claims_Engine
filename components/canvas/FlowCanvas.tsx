@@ -15,7 +15,7 @@ import ReactFlow, {
   ReactFlowInstance,
 } from "reactflow";
 import "reactflow/dist/style.css";
-import { EvidenceNode, ValidationNode, ClaimNode, RootClaimNode } from "./NodeTypes";
+import { EvidenceNode, ValidationNode, ClaimNode, RootClaimNode, ShapeNode, TextNode } from "./NodeTypes";
 import { isEdgeAllowed } from "@/lib/graph/edge-rules";
 import { NodeType } from "@/lib/types/graph";
 
@@ -26,6 +26,8 @@ const nodeTypes: NodeTypes = Object.freeze({
   validation: ValidationNode,
   claim: ClaimNode,
   claim_root: RootClaimNode,
+  shape: ShapeNode,
+  text: TextNode,
 }) as NodeTypes;
 
 interface FlowCanvasProps {
@@ -37,6 +39,7 @@ interface FlowCanvasProps {
   onNodeClick?: (node: Node) => void;
   onPaneClick?: () => void;
   onNodeDragStop?: (event: React.MouseEvent, node: Node) => void;
+  onSelectionDragStop?: (nodes: Node[]) => void;
 }
 
 export function FlowCanvas({
@@ -48,6 +51,7 @@ export function FlowCanvas({
   onNodeClick,
   onPaneClick,
   onNodeDragStop,
+  onSelectionDragStop,
 }: FlowCanvasProps) {
   const [nodes, setNodes, onNodesChangeInternal] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChangeInternal] = useEdgesState(initialEdges);
@@ -299,6 +303,11 @@ export function FlowCanvas({
           }
         }}
         onNodeDragStop={onNodeDragStop}
+        onSelectionDragStop={(event, selectedNodes) => {
+          if (onSelectionDragStop) {
+            onSelectionDragStop(selectedNodes as Node[]);
+          }
+        }}
         nodeTypes={nodeTypes}
         fitView={false}
         minZoom={0.01}
@@ -308,6 +317,7 @@ export function FlowCanvas({
         elementsSelectable={true}
         selectionOnDrag={true}
         multiSelectionKeyCode={["Shift", "Meta", "Control"]}
+        onlyRenderVisibleElements={true}
       >
         <Background 
           color="#e5e5e7" 

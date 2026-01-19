@@ -14,6 +14,16 @@ interface CustomNodeData {
   color?: string; // Optional custom node color (hex)
   fileRef?: string;
   _lite?: boolean;
+  shape?: "rectangle" | "ellipse";
+  width?: number;
+  height?: number;
+  fill?: string;
+  stroke?: string;
+  strokeWidth?: number;
+  borderRadius?: number;
+  text?: string;
+  fontSize?: number;
+  align?: "left" | "center" | "right";
 }
 
 const nodeStyles = {
@@ -45,6 +55,13 @@ const nodeStyles = {
 
 const baseNodeStyle = "rounded-2xl border p-5 min-w-[180px] shadow-sm hover:shadow-md transition-all duration-200 bg-white backdrop-blur-sm";
 
+function withThumb(fileRef: string, width = 400) {
+  if (fileRef.includes("?")) {
+    return `${fileRef}&thumb=1&w=${width}`;
+  }
+  return `${fileRef}?thumb=1&w=${width}`;
+}
+
 export function EvidenceNode({ id, data }: NodeProps<CustomNodeData>) {
   const style = nodeStyles.evidence;
   const isCommitted = data.status === "committed";
@@ -53,15 +70,13 @@ export function EvidenceNode({ id, data }: NodeProps<CustomNodeData>) {
   
   // Check if content is an image (data URL)
   const hasDataUrlImage = data.content && data.content.startsWith("data:image");
-  const dataUrlImage = hasDataUrlImage ? data.content : null;
+  const dataUrlImage =
+    hasDataUrlImage && data.content && data.content.length < 200000 ? data.content : null;
   
-  // Check if fileRef points to an image file
-  const fileRef = (data as any).fileRef;
-  const isImageFile = fileRef && /\.(png|jpg|jpeg|gif|webp)$/i.test(fileRef);
-  const fileRefImage = isImageFile ? fileRef : null;
+  const fileRefImage = data.fileRef ? withThumb(data.fileRef) : null;
   
-  // Use data URL if available, otherwise use fileRef
-  const imageUrl = dataUrlImage || fileRefImage || thumbnailUrl;
+  // Prefer fileRef thumbnails to avoid large data URLs
+  const imageUrl = fileRefImage || dataUrlImage || thumbnailUrl;
 
   useEffect(() => {
     let cancelled = false;
@@ -105,6 +120,8 @@ export function EvidenceNode({ id, data }: NodeProps<CustomNodeData>) {
             src={imageUrl} 
             alt="Evidence thumbnail" 
             className="w-full h-24 object-cover rounded-xl"
+            loading="lazy"
+            decoding="async"
             onError={(e) => {
               // Hide image if it fails to load
               (e.target as HTMLImageElement).style.display = 'none';
@@ -178,6 +195,54 @@ export function ClaimNode({ data }: NodeProps<CustomNodeData>) {
         </div>
       )}
       <Handle type="source" position={Position.Bottom} style={{ background: '#007aff', width: '8px', height: '8px', border: '2px solid white' }} />
+    </div>
+  );
+}
+
+export function ShapeNode({ data, selected }: NodeProps<CustomNodeData>) {
+  const width = data.width ?? 220;
+  const height = data.height ?? 140;
+  const fill = data.fill || "rgba(148, 163, 184, 0.2)";
+  const stroke = data.stroke || "rgba(71, 85, 105, 0.6)";
+  const strokeWidth = data.strokeWidth ?? 2;
+  const borderRadius = data.shape === "ellipse" ? 9999 : data.borderRadius ?? 16;
+
+  return (
+    <div
+      style={{
+        width,
+        height,
+        background: fill,
+        border: `${strokeWidth}px solid ${stroke}`,
+        borderRadius,
+      }}
+      className={`transition-shadow ${selected ? "shadow-md" : "shadow-sm"}`}
+    />
+  );
+}
+
+export function TextNode({ data, selected }: NodeProps<CustomNodeData>) {
+  const width = data.width ?? 220;
+  const height = data.height ?? 120;
+  const fontSize = data.fontSize ?? 16;
+  const color = data.color || "#111827";
+  const align = data.align || "left";
+  const text = data.text || "Text";
+
+  return (
+    <div
+      style={{
+        width,
+        height,
+        color,
+        fontSize,
+        textAlign: align,
+      }}
+      className={`bg-transparent p-2 whitespace-pre-wrap break-words ${
+        selected ? "outline outline-2 outline-indigo-200 rounded-md" : ""
+      }`}
+    >
+      {text}
     </div>
   );
 }

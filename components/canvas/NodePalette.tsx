@@ -33,6 +33,20 @@ export function NodePalette({ onAddNode }: NodePaletteProps) {
           <div className="w-2 h-2 rounded-full bg-purple-500"></div>
           <span className="text-sm font-medium">Claim</span>
         </button>
+        <button
+          onClick={() => onAddNode("shape")}
+          className="w-full apple-button text-left flex items-center gap-3 px-4 py-3 hover:bg-slate-50 hover:border-slate-200"
+        >
+          <div className="w-2 h-2 rounded-sm bg-slate-400"></div>
+          <span className="text-sm font-medium">Shape</span>
+        </button>
+        <button
+          onClick={() => onAddNode("text")}
+          className="w-full apple-button text-left flex items-center gap-3 px-4 py-3 hover:bg-indigo-50 hover:border-indigo-200"
+        >
+          <div className="w-2 h-2 rounded-full bg-indigo-400"></div>
+          <span className="text-sm font-medium">Text</span>
+        </button>
       </div>
     </div>
   );
