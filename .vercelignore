@@ -1,0 +1,10 @@
+node_modules/
+.next/
+.cache/
+uploads/
+*.log
+*.zip
+dev.db
+prisma/dev.db
+pilot-project/
+
