@@ -252,7 +252,7 @@ def main():
                     esc(edge["fromNodeId"]),
                     esc(edge["toNodeId"]),
                     esc(edge["type"]),
-                    esc(edge["locked"]),
+                    esc(bool(edge["locked"])),
                     esc(edge["createdAt"]),
                 ]) + ");"
             )
@@ -266,7 +266,7 @@ def main():
                 esc(edge["fromNodeId"]),
                 esc(edge["toNodeId"]),
                 esc(edge["type"]),
-                esc(edge["locked"]),
+                esc(bool(edge["locked"])),
                 esc(edge["createdAt"]),
             ]) + ");"
         )
