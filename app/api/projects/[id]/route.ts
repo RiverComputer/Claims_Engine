@@ -62,6 +62,7 @@ export async function GET(
           evidenceCID: parsedData.evidenceCID,
           validationCID: parsedData.validationCID,
           fileRef: parsedData.fileRef,
+          thumbnailRef: parsedData.thumbnailRef,
           text: parsedData.text,
           fontSize: parsedData.fontSize,
           align: parsedData.align,

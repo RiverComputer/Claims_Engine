@@ -3,8 +3,10 @@ import { readFile, readdir } from "fs/promises";
 import { join } from "path";
 import { existsSync } from "fs";
 import { createCanvas, loadImage } from "canvas";
+import { resolveBlobUrlById } from "@/lib/storage/file-store";
 
 const UPLOADS_DIR = join(process.cwd(), "uploads");
+export const runtime = "nodejs";
 
 // MIME type mapping
 const MIME_TYPES: Record<string, string> = {
@@ -33,6 +35,11 @@ export async function GET(
     const thumb = url.searchParams.get("thumb") === "1";
     const requestedWidth = parseInt(url.searchParams.get("w") || "0", 10);
     const requestedHeight = parseInt(url.searchParams.get("h") || "0", 10);
+
+    const blobUrl = await resolveBlobUrlById(id, thumb);
+    if (blobUrl) {
+      return NextResponse.redirect(blobUrl, 302);
+    }
 
     // Find file by ID (scan uploads directory for files starting with the ID)
     const files = await readdir(UPLOADS_DIR);

@@ -68,6 +68,9 @@ export function EvidenceForm({ data, onChange }: EvidenceFormProps) {
 
       const result = await response.json();
       updateField("fileRef", result.url);
+      if (result.thumbUrl) {
+        updateField("thumbnailRef", result.thumbUrl);
+      }
       setUploadedFile({ name: file.name, url: result.url });
     } catch (error) {
       console.error("Error uploading file:", error);

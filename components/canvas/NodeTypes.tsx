@@ -73,7 +73,7 @@ export function EvidenceNode({ id, data }: NodeProps<CustomNodeData>) {
   const dataUrlImage =
     hasDataUrlImage && data.content && data.content.length < 200000 ? data.content : null;
   
-  const fileRefImage = data.fileRef ? withThumb(data.fileRef) : null;
+  const fileRefImage = data.thumbnailRef || (data.fileRef ? withThumb(data.fileRef) : null);
   
   // Prefer fileRef thumbnails to avoid large data URLs
   const imageUrl = fileRefImage || dataUrlImage || thumbnailUrl;

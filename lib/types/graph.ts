@@ -7,6 +7,7 @@ export interface EvidenceData {
   shortDescription?: string;
   activity?: string;
   fileRef?: string; // File reference URL (e.g., /api/files/[id])
+  thumbnailRef?: string; // Thumbnail URL (blob or /api/files?id)
   color?: string; // Optional custom node color (hex)
   location?: {
     latitude?: number;

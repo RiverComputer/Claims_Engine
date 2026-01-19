@@ -1,23 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import { join } from "path";
-import { randomUUID } from "crypto";
+import { storeFile } from "@/lib/storage/file-store";
 
-const UPLOADS_DIR = join(process.cwd(), "uploads");
-
-// Ensure uploads directory exists
-async function ensureUploadsDir() {
-  try {
-    await mkdir(UPLOADS_DIR, { recursive: true });
-  } catch (error) {
-    // Directory already exists, ignore
-  }
-}
+export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
   try {
-    await ensureUploadsDir();
-
     const formData = await request.formData();
     const file = formData.get("file") as File;
 
@@ -25,27 +12,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    // Generate unique filename
-    const fileExtension = file.name.split(".").pop() || "";
-    const uniqueId = randomUUID();
-    const filename = `${uniqueId}.${fileExtension}`;
-    const filepath = join(UPLOADS_DIR, filename);
-
     // Convert File to Buffer
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
+    const stored = await storeFile({
+      buffer,
+      filename: file.name,
+      contentType: file.type,
+    });
 
-    // Write file to disk
-    await writeFile(filepath, buffer);
-
-    // Return file reference
     return NextResponse.json(
       {
-        id: uniqueId,
+        id: stored.id,
         filename: file.name,
         size: file.size,
-        type: file.type,
-        url: `/api/files/${uniqueId}`,
+        type: stored.contentType,
+        url: stored.fileRef,
+        thumbUrl: stored.thumbRef,
       },
       { status: 201 }
     );

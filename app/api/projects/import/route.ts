@@ -2,13 +2,14 @@ import "dotenv/config";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db/client";
 import { randomUUID } from "crypto";
-import { mkdirSync, writeFileSync, readdirSync, readFileSync, copyFileSync } from "fs";
+import { mkdirSync, writeFileSync, readdirSync, readFileSync } from "fs";
 import { join, extname, basename } from "path";
 import { spawnSync } from "child_process";
 import heicConvert from "heic-convert";
+import { storeFile } from "@/lib/storage/file-store";
 
-const UPLOADS_DIR = join(process.cwd(), "uploads");
 const CACHE_ROOT = join(process.cwd(), ".cache", "imports");
+export const runtime = "nodejs";
 
 function ensureDir(dirPath: string) {
   mkdirSync(dirPath, { recursive: true });
@@ -152,7 +153,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    ensureDir(UPLOADS_DIR);
     ensureDir(CACHE_ROOT);
 
     const project = await prisma.project.create({
@@ -204,18 +204,15 @@ export async function POST(request: NextRequest) {
     for (let i = 0; i < imageFiles.length; i++) {
       const filePath = imageFiles[i];
       const ext = extname(filePath).toLowerCase();
-      const fileId = randomUUID();
       const isHeic = ext === ".heic" || ext === ".heif";
-      const destExt = isHeic ? ".jpg" : ext;
-      const destFilename = `${fileId}${destExt}`;
-      const destPath = join(UPLOADS_DIR, destFilename);
+      const fileBuffer = readFileSync(filePath);
+      const uploadBuffer = isHeic ? await convertHeicToJpegBuffer(filePath) : fileBuffer;
+      const uploadName = isHeic ? `${basename(filePath, ext)}.jpg` : basename(filePath);
 
-      if (isHeic) {
-        const jpegBuffer = await convertHeicToJpegBuffer(filePath);
-        writeFileSync(destPath, jpegBuffer);
-      } else {
-        copyFileSync(filePath, destPath);
-      }
+      const stored = await storeFile({
+        buffer: uploadBuffer,
+        filename: uploadName,
+      });
 
       const title = toTitle(filePath);
 
@@ -228,7 +225,8 @@ export async function POST(request: NextRequest) {
         title,
         content: `Evidence file: ${basename(filePath)}`,
         shortDescription: `Imported from Drive: ${basename(filePath)}`,
-        fileRef: `/api/files/${fileId}`,
+        fileRef: stored.fileRef,
+        thumbnailRef: stored.thumbRef,
         createdAt: new Date().toISOString(),
       };
 
