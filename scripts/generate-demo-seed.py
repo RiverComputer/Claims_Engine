@@ -7,7 +7,7 @@ from pathlib import Path
 
 DB_PATH = Path("dev.db")
 OUT_PATH = Path("prisma/seed/demo_seed.sql")
-PLACEHOLDER_IMAGE_URL = "https://placehold.co/400x300/png?text=Evidence"
+PLACEHOLDER_IMAGE_URL = "/placeholders/evidence.svg"
 
 PROJECT_TITLES = [
     "Mida Creek Mangrove Planting",

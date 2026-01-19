@@ -1,0 +1,10 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" rx="18" fill="#EEF2F7"/>
+  <rect x="24" y="24" width="352" height="252" rx="12" fill="#F8FAFC" stroke="#CBD5E1" stroke-width="2"/>
+  <path d="M78 210L150 138L206 194L262 138L322 198" stroke="#94A3B8" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="132" cy="112" r="20" fill="#CBD5E1"/>
+  <text x="200" y="236" text-anchor="middle" fill="#64748B" font-size="20" font-family="Arial, Helvetica, sans-serif">
+    Evidence
+  </text>
+</svg>
+

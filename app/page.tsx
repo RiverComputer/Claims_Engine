@@ -107,7 +107,9 @@ export default function HomePage() {
     <div className="min-h-screen bg-[#f5f5f7] p-12">
       <div className="max-w-5xl mx-auto">
         <h1 className="text-5xl font-semibold mb-3 text-gray-900 tracking-tight">Claims Engine</h1>
-        <p className="text-xl text-gray-600 mb-12">Build and manage your claims</p>
+        <p className="text-lg text-gray-700 mb-12 whitespace-pre-line">
+          {"The Claims Engine is a graph-based system for connecting evidence to claims.\n\nIt lets teams organize documents, observations, decisions, and actions into structured relationships—showing not just what happened, but what was learned, how it was validated, and why it matters. Claims are built from evidence, supported by validation, and remain open to revision as conditions change.\n\nThis is an experimental, in-progress demo."}
+        </p>
 
         <div className="mb-8">
           <div className="flex gap-3">
