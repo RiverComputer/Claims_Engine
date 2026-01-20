@@ -238,8 +238,11 @@ export function TextNode({ data, selected }: NodeProps<CustomNodeData>) {
         color,
         fontSize,
         textAlign: align,
+        background: "rgba(255, 255, 255, 0.85)",
+        border: "1px dashed rgba(148, 163, 184, 0.9)",
+        borderRadius: 10,
       }}
-      className={`bg-transparent p-2 whitespace-pre-wrap break-words ${
+      className={`p-2 whitespace-pre-wrap break-words ${
         selected ? "outline outline-2 outline-indigo-200 rounded-md" : ""
       }`}
     >
