@@ -24,12 +24,17 @@ export async function POST(request: NextRequest) {
     }
 
     // For root node, use the hardcoded ID; otherwise let Prisma generate a UUID
+    const resolvedData = data ?? {};
+    if (type === "text" && (!resolvedData.text || resolvedData.text.trim() === "")) {
+      resolvedData.text = "Text";
+    }
+
     const nodeData: any = {
       projectId,
       type: type as NodeType,
       positionX: parseFloat(positionX),
       positionY: parseFloat(positionY),
-      data: JSON.stringify(data ?? {}),
+      data: JSON.stringify(resolvedData),
       status: "draft",
     };
 

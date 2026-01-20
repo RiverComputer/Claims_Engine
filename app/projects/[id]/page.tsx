@@ -219,7 +219,7 @@ export default function ProjectPage() {
         const newNode = await response.json();
         console.log("New node created:", newNode);
         const parsedData = JSON.parse(newNode.data);
-        const label = parsedData.title || parsedData.shortSummary || "";
+        const label = parsedData.title || parsedData.shortSummary || parsedData.text || "";
         const flowNode: Node = {
           id: newNode.id,
           type: newNode.type,
@@ -643,11 +643,11 @@ export default function ProjectPage() {
         <ExportPanel projectId={projectId} />
       </div>
       {selectedNode && (
-        <InspectorPanel
-          selectedNode={selectedNode}
-          onUpdateNode={handleUpdateNode}
-          projectId={projectId}
-        />
+      <InspectorPanel
+        selectedNode={selectedNode}
+        onUpdateNode={handleUpdateNode}
+        projectId={projectId}
+      />
       )}
       <MintModal
         isOpen={isMintModalOpen}
