@@ -11,6 +11,7 @@
     "lint": "eslint",
     "db:migrate": "prisma migrate dev",
     "db:generate": "prisma generate",
+    "dev:setup": "bash scripts/setup-local-dev.sh",
     "import:obuntu": "tsx scripts/import-obuntu-resets.ts",
     "import:nv-mapping": "tsx scripts/import-nv-mapping.ts",
     "seed:obuntu": "tsx scripts/seed-obuntu.ts",
