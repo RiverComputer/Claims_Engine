@@ -8,6 +8,7 @@ from pathlib import Path
 DB_PATH = Path("dev.db")
 OUT_PATH = Path("prisma/seed/demo_seed.sql")
 PLACEHOLDER_IMAGE_URL = "/placeholders/evidence.svg"
+MEDIA_MAP_PATH = Path("prisma/seed/demo_media.json")
 
 PROJECT_TITLES = [
     "Mida Creek Mangrove Planting",
@@ -36,7 +37,7 @@ def load_projects(cur):
         raise SystemExit(f"Missing projects in dev.db: {missing}")
     return projects
 
-def normalize_node_data(node):
+def normalize_node_data(node, project_title, media_by_project, media_index, media_by_node_id, allow_assign=True):
     try:
         data = json.loads(node["data"])
     except Exception:
@@ -46,12 +47,21 @@ def normalize_node_data(node):
     node_type = node["type"]
 
     if node_type == "evidence":
+        media = media_by_node_id.get(node["id"])
+        if not media and allow_assign:
+            items = media_by_project.get(project_title or "", [])
+            idx = media_index.get(project_title or "", 0)
+            if items:
+                media = items[idx % len(items)]
+                media_by_node_id[node["id"]] = media
+                media_index[project_title] = idx + 1
+
         return json.dumps({
             "title": data.get("title") or "Evidence",
             "content": "Evidence placeholder",
             "shortDescription": data.get("shortDescription") or "",
-            "fileRef": PLACEHOLDER_IMAGE_URL,
-            "thumbnailRef": PLACEHOLDER_IMAGE_URL,
+            "fileRef": (media or {}).get("fileRef") or PLACEHOLDER_IMAGE_URL,
+            "thumbnailRef": (media or {}).get("thumbnailRef") or PLACEHOLDER_IMAGE_URL,
             "color": data.get("color"),
             "createdAt": data.get("createdAt") or now,
         })
@@ -112,6 +122,13 @@ def main():
     projects = load_projects(cur)
     project_rows = [projects[t] for t in PROJECT_TITLES]
 
+    media_by_project = {}
+    media_index = {}
+    media_by_node_id = {}
+    if MEDIA_MAP_PATH.exists():
+        media_by_project = json.loads(MEDIA_MAP_PATH.read_text())
+        media_index = {title: 0 for title in media_by_project.keys()}
+
     project_nodes = {}
     project_edges = {}
     for proj in project_rows:
@@ -155,7 +172,7 @@ def main():
                 "status": node["status"],
                 "positionX": node["positionX"] + offsets[pid],
                 "positionY": node["positionY"],
-                "data": normalize_node_data(node),
+                "data": normalize_node_data(node, proj["title"], media_by_project, media_index, media_by_node_id, False),
                 "cid": node["cid"],
                 "attestationUID": node["attestationUID"],
                 "createdAt": node["createdAt"],
@@ -216,7 +233,7 @@ def main():
                     esc(node["status"]),
                     esc(node["positionX"]),
                     esc(node["positionY"]),
-                    esc(normalize_node_data(node)),
+                    esc(normalize_node_data(node, proj["title"], media_by_project, media_index, media_by_node_id)),
                     esc(node["cid"]),
                     esc(node["attestationUID"]),
                     esc(node["createdAt"]),
