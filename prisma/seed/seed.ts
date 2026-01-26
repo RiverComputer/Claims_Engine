@@ -1,16 +1,10 @@
 import { readFileSync } from "fs";
+import { Client } from "pg";
 import { prisma } from "../../lib/db/client";
 
 const PROJECT_TITLE = "Integrated Project Canvas";
 
 const seedPath = "prisma/seed/demo_seed.sql";
-
-function splitStatements(sql: string) {
-  return sql
-    .split(";")
-    .map((stmt) => stmt.trim())
-    .filter((stmt) => stmt && !stmt.startsWith("--"));
-}
 
 async function main() {
   const existing = await prisma.project.findFirst({
@@ -23,11 +17,15 @@ async function main() {
   }
 
   const sql = readFileSync(seedPath, "utf-8");
-  const statements = splitStatements(sql);
-
-  for (const statement of statements) {
-    await prisma.$executeRawUnsafe(statement);
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) {
+    throw new Error("DATABASE_URL is not set. Cannot run seed.");
   }
+
+  const client = new Client({ connectionString: databaseUrl });
+  await client.connect();
+  await client.query(sql);
+  await client.end();
 }
 
 main()
