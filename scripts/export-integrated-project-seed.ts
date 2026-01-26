@@ -15,6 +15,13 @@ function esc(value: any) {
   return `'${str}'`;
 }
 
+function formatDate(value: any) {
+  if (!value) return value;
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toISOString();
+}
+
 function ensureDir(path: string) {
   mkdirSync(path, { recursive: true });
 }
@@ -76,8 +83,8 @@ async function main() {
       esc(project.title),
       esc(project.description),
       esc(project.ownerUserId),
-      esc(project.createdAt),
-      esc(project.updatedAt),
+      esc(formatDate(project.createdAt)),
+      esc(formatDate(project.updatedAt)),
     ].join(",")});`
   );
 
@@ -113,8 +120,8 @@ async function main() {
         esc(dataJson),
         esc(node.cid),
         esc(node.attestationUID),
-        esc(node.createdAt),
-        esc(node.updatedAt),
+        esc(formatDate(node.createdAt)),
+        esc(formatDate(node.updatedAt)),
       ].join(",")});`
     );
   }
@@ -128,7 +135,7 @@ async function main() {
         esc(edge.toNodeId),
         esc(edge.type),
         esc(edge.locked),
-        esc(edge.createdAt),
+        esc(formatDate(edge.createdAt)),
       ].join(",")});`
     );
   }
