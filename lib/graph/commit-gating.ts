@@ -54,7 +54,7 @@ export function validateCommit(
     const validationData = node.data as any;
     const evidenceCIDs = validationData.evidenceCID || [];
     const connectedEvidence = edges.filter(
-      (e) => e.target === node.id && e.type === "references"
+      (e) => e.target === node.id && (e.type === "references" || e.type === "benchmark")
     );
     if (connectedEvidence.length === 0 && evidenceCIDs.length === 0) {
       errors.push("Validation must have at least one Evidence reference (connect an Evidence node)");

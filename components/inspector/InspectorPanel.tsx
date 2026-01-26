@@ -224,35 +224,35 @@ export function InspectorPanel({
           </div>
         )}
         {showNodeColor && (
-          <div className="mb-5 p-3 rounded-xl bg-gray-50 border border-gray-200">
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-xs font-medium text-gray-700">Node Color</label>
-              {(localData as any).color && (
-                <button
-                  type="button"
-                  onClick={handleClearColor}
-                  className="text-xs text-gray-500 hover:text-gray-700"
-                >
-                  Reset
-                </button>
-              )}
-            </div>
-            <div className="flex items-center gap-3">
-              <input
-                type="color"
-                value={currentColor}
-                onChange={(e) => handleColorChange(e.target.value)}
-                className="h-8 w-12 rounded-md border border-gray-300 bg-white"
-              />
-              <input
-                type="text"
-                value={currentColor}
-                onChange={(e) => handleColorChange(e.target.value)}
-                className="apple-input text-xs font-mono"
-                placeholder="#RRGGBB"
-              />
-            </div>
+        <div className="mb-5 p-3 rounded-xl bg-gray-50 border border-gray-200">
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-xs font-medium text-gray-700">Node Color</label>
+            {(localData as any).color && (
+              <button
+                type="button"
+                onClick={handleClearColor}
+                className="text-xs text-gray-500 hover:text-gray-700"
+              >
+                Reset
+              </button>
+            )}
           </div>
+          <div className="flex items-center gap-3">
+            <input
+              type="color"
+              value={currentColor}
+              onChange={(e) => handleColorChange(e.target.value)}
+              className="h-8 w-12 rounded-md border border-gray-300 bg-white"
+            />
+            <input
+              type="text"
+              value={currentColor}
+              onChange={(e) => handleColorChange(e.target.value)}
+              className="apple-input text-xs font-mono"
+              placeholder="#RRGGBB"
+            />
+          </div>
+        </div>
         )}
       </div>
 

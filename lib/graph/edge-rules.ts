@@ -31,8 +31,10 @@ export function isEdgeAllowed(fromType: NodeType, toType: NodeType): boolean {
 /**
  * Get edge type label for a connection
  */
-export function getEdgeType(fromType: NodeType, toType: NodeType): string {
-  if (fromType === "evidence" && toType === "validation") return "references";
+export function getEdgeType(fromType: NodeType, toType: NodeType, targetHandle?: string): string {
+  if (fromType === "evidence" && toType === "validation") {
+    return targetHandle === "benchmark" ? "benchmark" : "references";
+  }
   if (fromType === "validation" && (toType === "claim" || toType === "claim_root")) return "validates";
   if (fromType === "evidence" && (toType === "claim" || toType === "claim_root")) return "includes";
   if (fromType === "validation" && toType === "evidence") return "evidence-of-validation";

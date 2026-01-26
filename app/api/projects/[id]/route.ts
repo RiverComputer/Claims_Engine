@@ -30,17 +30,17 @@ export async function GET(
           },
         })
       : await prisma.project.findUnique({
-          where: { id },
-          include: {
-            nodes: {
-              orderBy: { createdAt: "asc" },
-            },
-            edges: true,
-            commits: {
-              orderBy: { committedAt: "desc" },
-            },
-          },
-        });
+      where: { id },
+      include: {
+        nodes: {
+          orderBy: { createdAt: "asc" },
+        },
+        edges: true,
+        commits: {
+          orderBy: { committedAt: "desc" },
+        },
+      },
+    });
 
     if (!project) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
@@ -65,6 +65,9 @@ export async function GET(
           validationCID: parsedData.validationCID,
           fileRef: parsedData.fileRef,
           thumbnailRef: parsedData.thumbnailRef,
+          imageRotation: parsedData.imageRotation,
+          imageCrop: parsedData.imageCrop,
+          imageAspectRatio: parsedData.imageAspectRatio,
           text: parsedData.text,
           fontSize: parsedData.fontSize,
           align: parsedData.align,

@@ -14,6 +14,14 @@ interface CustomNodeData {
   color?: string; // Optional custom node color (hex)
   fileRef?: string;
   thumbnailRef?: string;
+  imageRotation?: number;
+  imageCrop?: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+  imageAspectRatio?: number;
   _lite?: boolean;
   shape?: "rectangle" | "ellipse";
   width?: number;
@@ -68,6 +76,11 @@ export function EvidenceNode({ id, data }: NodeProps<CustomNodeData>) {
   const isCommitted = data.status === "committed";
   const nodeColor = data.color || "rgb(37, 99, 235)";
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
+  const rotation = Number.isFinite(data.imageRotation) ? (data.imageRotation as number) : 0;
+  const aspectRatio =
+    Number.isFinite(data.imageAspectRatio) && (data.imageAspectRatio as number) > 0
+      ? (data.imageAspectRatio as number)
+      : null;
   
   // Check if content is an image (data URL)
   const hasDataUrlImage = data.content && data.content.startsWith("data:image");
@@ -117,17 +130,23 @@ export function EvidenceNode({ id, data }: NodeProps<CustomNodeData>) {
       <div className={`font-semibold text-xs mb-2 ${style.accent} uppercase tracking-wide`}>Evidence</div>
       {imageUrl && (
         <div className="mb-3 -mx-1">
-          <img 
-            src={imageUrl} 
-            alt="Evidence thumbnail" 
-            className="w-full h-24 object-cover rounded-xl"
-            loading="lazy"
-            decoding="async"
-            onError={(e) => {
-              // Hide image if it fails to load
-              (e.target as HTMLImageElement).style.display = 'none';
-            }}
-          />
+          <div
+            className="w-full overflow-hidden rounded-xl bg-gray-100"
+            style={aspectRatio ? { aspectRatio } : { height: "6rem" }}
+          >
+            <img 
+              src={imageUrl} 
+              alt="Evidence thumbnail" 
+              className="w-full h-full object-cover"
+              style={rotation ? { transform: `rotate(${rotation}deg)` } : undefined}
+              loading="lazy"
+              decoding="async"
+              onError={(e) => {
+                // Hide image if it fails to load
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
+          </div>
         </div>
       )}
       <div className="text-sm font-medium text-gray-900 truncate mb-1">{data.label || "Untitled Evidence"}</div>
@@ -145,15 +164,34 @@ export function ValidationNode({ data }: NodeProps<CustomNodeData>) {
   const style = nodeStyles.validation;
   const isCommitted = data.status === "committed";
   const nodeColor = data.color || "rgb(34, 197, 94)";
+  const validatorNames =
+    Array.isArray((data as any).validatorNames) && (data as any).validatorNames.length > 0
+      ? (data as any).validatorNames.join(", ")
+      : "";
 
   return (
     <div
       className={`${baseNodeStyle} ${style.border} ${style.text} cursor-pointer border-l-4`}
       style={{ borderLeftColor: nodeColor, borderColor: nodeColor }}
     >
-      <Handle type="target" position={Position.Top} style={{ background: '#007aff', width: '8px', height: '8px', border: '2px solid white' }} />
+      <Handle
+        type="target"
+        id="input"
+        position={Position.Top}
+        style={{ background: "#007aff", width: "8px", height: "8px", border: "2px solid white", left: "35%" }}
+      />
+      <Handle
+        type="target"
+        id="benchmark"
+        position={Position.Top}
+        style={{ background: "#16a34a", width: "8px", height: "8px", border: "2px solid white", left: "65%" }}
+      />
       <div className={`font-semibold text-xs mb-2 ${style.accent} uppercase tracking-wide`}>Validation</div>
+      <div className="text-[10px] text-gray-500 mb-2">Inputs: Evidence | Benchmark</div>
       <div className="text-sm font-medium text-gray-900 truncate mb-1">{data.label || "Untitled Validation"}</div>
+      {validatorNames && (
+        <div className="text-xs text-gray-600 truncate">Validator: {validatorNames}</div>
+      )}
       {isCommitted && (
         <div className="text-xs text-gray-500 mt-2 flex items-center gap-1">
           <span className="text-green-600">✓</span> Committed

@@ -96,6 +96,7 @@ export default function ProjectPage() {
         target: e.toNodeId,
         type: "bezier",
         label: e.type,
+        targetHandle: e.type === "benchmark" ? "benchmark" : undefined,
         style: { stroke: e.locked ? "#999" : "#333" },
       }));
       
@@ -384,6 +385,7 @@ export default function ProjectPage() {
           projectId,
           fromNodeId: connection.source,
           toNodeId: connection.target,
+          targetHandle: connection.targetHandle,
         }),
       });
 
@@ -396,6 +398,8 @@ export default function ProjectPage() {
           target: newEdge.toNodeId,
           type: "bezier",
           label: newEdge.type,
+          targetHandle: connection.targetHandle || undefined,
+          sourceHandle: connection.sourceHandle || undefined,
           style: { stroke: newEdge.locked ? "#999" : "#333" },
         };
         

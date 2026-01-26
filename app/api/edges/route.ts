@@ -9,7 +9,7 @@ export const runtime = "nodejs";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { projectId, fromNodeId, toNodeId } = body;
+    const { projectId, fromNodeId, toNodeId, targetHandle } = body;
 
     if (!projectId || !fromNodeId || !toNodeId) {
       return NextResponse.json(
@@ -79,12 +79,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const edgeType = getEdgeType(fromNode.type as any, toNode.type as any, targetHandle);
+
     // Check if edge already exists (using actual database IDs)
     const existing = await prisma.edge.findFirst({
       where: {
         fromNodeId: actualFromNodeId,
         toNodeId: actualToNodeId,
-        type: getEdgeType(fromNode.type as any, toNode.type as any),
+        type: edgeType,
       },
     });
 
@@ -97,7 +99,7 @@ export async function POST(request: NextRequest) {
         projectId,
         fromNodeId: actualFromNodeId, // Use actual database ID
         toNodeId: actualToNodeId, // Use actual database ID
-        type: getEdgeType(fromNode.type as any, toNode.type as any),
+        type: edgeType,
         locked: false,
       },
     });

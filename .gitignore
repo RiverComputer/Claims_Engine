@@ -44,6 +44,7 @@ next-env.d.ts
 *.sqlite3
 dev.db
 prisma/dev.db
+prisma/seed/demo_media.json
 
 # Internal documentation and planning files
 prototype-v2-cursor-brief.md

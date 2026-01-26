@@ -8,6 +8,14 @@ export interface EvidenceData {
   activity?: string;
   fileRef?: string; // File reference URL (e.g., /api/files/[id])
   thumbnailRef?: string; // Thumbnail URL (blob or /api/files?id)
+  imageRotation?: number; // Degrees (0/90/180/270)
+  imageCrop?: {
+    x: number; // 0..1
+    y: number; // 0..1
+    width: number; // 0..1
+    height: number; // 0..1
+  };
+  imageAspectRatio?: number; // width / height
   color?: string; // Optional custom node color (hex)
   location?: {
     latitude?: number;
