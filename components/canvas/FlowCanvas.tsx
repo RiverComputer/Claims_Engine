@@ -56,6 +56,7 @@ export function FlowCanvas({
   const [nodes, setNodes, onNodesChangeInternal] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChangeInternal] = useEdgesState(initialEdges);
   const reactFlowInstance = useRef<ReactFlowInstance | null>(null);
+  const didFitViewRef = useRef(false);
   const historyRef = useRef<Node[][]>([]);
   const isApplyingHistoryRef = useRef(false);
 
@@ -117,6 +118,15 @@ export function FlowCanvas({
       prevNodeIdsRef.current = currentNodeIds;
     }
   }, [initialNodes]); // Only depend on initialNodes, not nodes (to avoid circular updates)
+
+  useEffect(() => {
+    if (didFitViewRef.current) return;
+    if (!reactFlowInstance.current) return;
+    if (nodes.length === 0) return;
+
+    reactFlowInstance.current.fitView({ padding: 0.2 });
+    didFitViewRef.current = true;
+  }, [nodes]);
 
   useEffect(() => {
     if (isInitialMountRef.current || isApplyingHistoryRef.current) {

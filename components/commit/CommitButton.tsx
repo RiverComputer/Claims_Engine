@@ -13,6 +13,7 @@ interface CommitButtonProps {
 export function CommitButton({ nodeId, projectId, nodeType, status }: CommitButtonProps) {
   const [isCommitting, setIsCommitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [commitMethod, setCommitMethod] = useState<string>("");
 
   const handleCommit = async () => {
     if (status === "committed") {
@@ -24,10 +25,10 @@ export function CommitButton({ nodeId, projectId, nodeType, status }: CommitButt
     setError(null);
 
     try {
-      const response = await fetch("/api/commit", {
+    const response = await fetch("/api/commit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nodeId, projectId }),
+      body: JSON.stringify({ nodeId, projectId, commitMethod }),
       });
 
       if (!response.ok) {
@@ -55,13 +56,31 @@ export function CommitButton({ nodeId, projectId, nodeType, status }: CommitButt
 
   return (
     <div>
+      <label className="block text-xs font-medium text-gray-700 mb-2">
+        Commit method
+      </label>
+      <select
+        value={commitMethod}
+        onChange={(e) => setCommitMethod(e.target.value)}
+        className="apple-input text-sm mb-3"
+      >
+        <option value="">Select a method…</option>
+        <option value="eas_attestation">EAS Attestation</option>
+        <option value="regen_ledger">Regen Ledger</option>
+        <option value="other">Something else</option>
+      </select>
       <button
         onClick={handleCommit}
-        disabled={isCommitting}
+        disabled={isCommitting || !commitMethod}
         className="w-full apple-button apple-button-primary disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#007aff]"
       >
         {isCommitting ? "Committing..." : "Commit Node"}
       </button>
+      {!commitMethod && (
+        <div className="mt-2 text-xs text-gray-500">
+          Select a commit method to enable committing.
+        </div>
+      )}
       {error && (
         <div className="mt-3 text-sm text-red-600 bg-red-50 px-3 py-2 rounded-xl border border-red-200">
           {error}

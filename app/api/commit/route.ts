@@ -9,7 +9,7 @@ export const runtime = "nodejs";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { nodeId, projectId } = body;
+    const { nodeId, projectId, commitMethod } = body;
 
     if (!nodeId || !projectId) {
       return NextResponse.json(
@@ -139,7 +139,10 @@ export async function POST(request: NextRequest) {
         cid: result.cid,
         attestationUID: result.attestationUID,
         payload: JSON.stringify(nodeData),
-        metadata: JSON.stringify(result.metadata || {}),
+        metadata: JSON.stringify({
+          ...(result.metadata || {}),
+          commitMethod: commitMethod || null,
+        }),
       },
     });
 

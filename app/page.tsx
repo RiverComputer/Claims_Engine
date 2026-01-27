@@ -19,6 +19,7 @@ export default function HomePage() {
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
   const [showImport, setShowImport] = useState(false);
+  const visibleTitles = new Set(["Integrated Project Canvas", "Essential Schema"]);
 
   useEffect(() => {
     fetchProjects();
@@ -111,73 +112,18 @@ export default function HomePage() {
           {"The Claims Engine is a graph-based system for connecting evidence to claims.\n\nIt lets teams organize documents, observations, decisions, and actions into structured relationships—showing not just what happened, but what was learned, how it was validated, and why it matters. Claims are built from evidence, supported by validation, and remain open to revision as conditions change.\n\nThis is an experimental, in-progress demo."}
         </p>
 
-        <div className="mb-8">
-          <div className="flex gap-3">
-            <input
-              type="text"
-              value={newProjectTitle}
-              onChange={(e) => setNewProjectTitle(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && createProject()}
-              placeholder="Project name"
-              className="flex-1 apple-input"
-            />
-            <button
-              onClick={createProject}
-              className="apple-button apple-button-primary px-8"
-            >
-              Create
-            </button>
-            <button
-              onClick={() => setShowImport((prev) => !prev)}
-              className="apple-button px-6"
-            >
-              Import
-            </button>
-          </div>
-        </div>
-
-        {showImport && (
-          <div className="mb-12">
-            <div className="flex flex-col gap-3">
-              <input
-                type="text"
-                value={importTitle}
-                onChange={(e) => setImportTitle(e.target.value)}
-                placeholder="Project name (import)"
-                className="apple-input"
-              />
-              <div className="flex gap-3">
-                <input
-                  type="text"
-                  value={importUrl}
-                  onChange={(e) => setImportUrl(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && importProject()}
-                  placeholder="Drive link to a ZIP folder"
-                  className="flex-1 apple-input"
-                />
-                <button
-                  onClick={importProject}
-                  disabled={importing}
-                  className="apple-button px-6"
-                >
-                  {importing ? "Importing..." : "Import"}
-                </button>
-              </div>
-              {importError && (
-                <div className="text-sm text-red-600">{importError}</div>
-              )}
-            </div>
-          </div>
-        )}
+        {/* Create/import disabled for the public landing page */}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {projects.length === 0 ? (
+          {projects.filter((project) => visibleTitles.has(project.title)).length === 0 ? (
             <div className="col-span-2 text-center py-16">
               <p className="text-gray-500 text-lg">No projects yet</p>
               <p className="text-gray-400 text-sm mt-2">Create your first project to get started</p>
             </div>
           ) : (
-            projects.map((project) => (
+            projects
+              .filter((project) => visibleTitles.has(project.title))
+              .map((project) => (
               <Link
                 key={project.id}
                 href={`/projects/${project.id}`}
