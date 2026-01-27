@@ -1,5 +1,5 @@
 {
   "framework": "nextjs",
-  "buildCommand": "prisma migrate deploy && prisma db seed && next build"
+  "buildCommand": "prisma migrate deploy && SEED_FORCE=1 prisma db seed && next build"
 }
 
