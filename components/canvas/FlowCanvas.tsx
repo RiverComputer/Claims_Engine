@@ -120,6 +120,12 @@ export function FlowCanvas({
   }, [initialNodes]); // Only depend on initialNodes, not nodes (to avoid circular updates)
 
   useEffect(() => {
+    if (initialNodes.length > 0) {
+      didFitViewRef.current = false;
+    }
+  }, [initialNodes.length]);
+
+  useEffect(() => {
     if (didFitViewRef.current) return;
     if (!reactFlowInstance.current) return;
     if (nodes.length === 0) return;
