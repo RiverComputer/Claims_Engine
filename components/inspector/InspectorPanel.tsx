@@ -13,12 +13,16 @@ import { CommitButton } from "../commit/CommitButton";
 interface InspectorPanelProps {
   selectedNode: Node | null;
   onUpdateNode: (nodeId: string, data: NodeData) => void;
+  onDraftChange?: (nodeId: string, data: NodeData) => void;
+  onReorderNode?: (nodeId: string, direction: "front" | "back") => void;
   projectId: string;
 }
 
 export function InspectorPanel({
   selectedNode,
   onUpdateNode,
+  onDraftChange,
+  onReorderNode,
   projectId,
 }: InspectorPanelProps) {
   const [localData, setLocalData] = useState<NodeData | null>(null);
@@ -34,6 +38,11 @@ export function InspectorPanel({
       const nodeData = (selectedNode.data as any) || {};
       const nodeDataString = JSON.stringify(nodeData);
       
+      // If we're editing this same node, don't clobber local edits
+      if (nodeId === prevNodeIdRef.current && hasUnsavedChanges) {
+        return;
+      }
+
       // Only update if node ID or data actually changed
       if (nodeId === prevNodeIdRef.current && nodeDataString === prevNodeDataRef.current) {
         return; // No change, skip update
@@ -140,6 +149,9 @@ export function InspectorPanel({
     const updatedData = { ...data, _status: nodeStatus } as any;
     setLocalData(updatedData);
     setHasUnsavedChanges(true);
+    if (selectedNode && onDraftChange) {
+      onDraftChange(selectedNode.id, updatedData as NodeData);
+    }
   };
 
   const handleColorChange = (color: string) => {
@@ -255,6 +267,34 @@ export function InspectorPanel({
         </div>
         )}
       </div>
+
+      {onReorderNode && (
+        <div className="mb-5 p-3 rounded-xl bg-gray-50 border border-gray-200">
+          <div className="text-xs font-medium text-gray-700 mb-2">Layer Order</div>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              className="apple-button text-xs flex-1"
+              onClick={() => {
+                onReorderNode(selectedNode.id, "front");
+                setHasUnsavedChanges(true);
+              }}
+            >
+              Bring to front
+            </button>
+            <button
+              type="button"
+              className="apple-button text-xs flex-1"
+              onClick={() => {
+                onReorderNode(selectedNode.id, "back");
+                setHasUnsavedChanges(true);
+              }}
+            >
+              Send to back
+            </button>
+          </div>
+        </div>
+      )}
 
             {nodeType === "evidence" && (
               <EvidenceForm

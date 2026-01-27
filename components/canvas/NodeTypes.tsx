@@ -164,10 +164,13 @@ export function ValidationNode({ data }: NodeProps<CustomNodeData>) {
   const style = nodeStyles.validation;
   const isCommitted = data.status === "committed";
   const nodeColor = data.color || "rgb(34, 197, 94)";
-  const validatorNames =
-    Array.isArray((data as any).validatorNames) && (data as any).validatorNames.length > 0
-      ? (data as any).validatorNames.join(", ")
-      : "";
+  const rawValidators = (data as any).validatorNames ?? (data as any).validators ?? [];
+  const validatorList = Array.isArray(rawValidators)
+    ? rawValidators
+    : typeof rawValidators === "string"
+      ? rawValidators.split(",").map((v) => v.trim()).filter(Boolean)
+      : [];
+  const validatorNames = validatorList.length > 0 ? validatorList.join(", ") : "";
 
   return (
     <div
@@ -190,7 +193,7 @@ export function ValidationNode({ data }: NodeProps<CustomNodeData>) {
       <div className="text-[10px] text-gray-500 mb-2">Inputs: Evidence | Benchmark</div>
       <div className="text-sm font-medium text-gray-900 truncate mb-1">{data.label || "Untitled Validation"}</div>
       {validatorNames && (
-        <div className="text-xs text-gray-600 truncate">Validator: {validatorNames}</div>
+        <div className="text-xs text-gray-600 line-clamp-2 break-words">Validator: {validatorNames}</div>
       )}
       {isCommitted && (
         <div className="text-xs text-gray-500 mt-2 flex items-center gap-1">
@@ -276,9 +279,8 @@ export function TextNode({ data, selected }: NodeProps<CustomNodeData>) {
         color,
         fontSize,
         textAlign: align,
-        background: "rgba(255, 255, 255, 0.85)",
-        border: "1px dashed rgba(148, 163, 184, 0.9)",
-        borderRadius: 10,
+        background: "transparent",
+        border: "none",
       }}
       className={`p-2 whitespace-pre-wrap break-words ${
         selected ? "outline outline-2 outline-indigo-200 rounded-md" : ""

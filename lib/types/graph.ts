@@ -16,6 +16,7 @@ export interface EvidenceData {
     height: number; // 0..1
   };
   imageAspectRatio?: number; // width / height
+  zIndex?: number;
   color?: string; // Optional custom node color (hex)
   location?: {
     latitude?: number;
@@ -31,6 +32,7 @@ export interface ValidationData {
   validatorNames: string[];
   validationType: string;
   evidenceCID: string[];
+  zIndex?: number;
   color?: string; // Optional custom node color (hex)
   location?: {
     latitude?: number;
@@ -47,6 +49,7 @@ export interface ClaimData {
   validationCID: string[];
   image?: string;
   project?: string;
+  zIndex?: number;
   color?: string; // Optional custom node color (hex)
   createdAt: string;
 }
@@ -59,6 +62,7 @@ export interface ShapeData {
   stroke?: string;
   strokeWidth?: number;
   borderRadius?: number;
+  zIndex?: number;
   createdAt: string;
 }
 
@@ -69,6 +73,7 @@ export interface TextData {
   width?: number;
   height?: number;
   align?: "left" | "center" | "right";
+  zIndex?: number;
   createdAt: string;
 }
 

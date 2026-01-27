@@ -60,6 +60,7 @@ export async function GET(
           shortSummary: parsedData.shortSummary,
           shortDescription: parsedData.shortDescription,
           validatorNames: parsedData.validatorNames,
+          validators: parsedData.validators,
           validationType: parsedData.validationType,
           evidenceCID: parsedData.evidenceCID,
           validationCID: parsedData.validationCID,

@@ -52,7 +52,7 @@ export default function ProjectPage() {
       // Convert DB nodes to React Flow nodes (handle undefined/null)
       // CRITICAL: Always use positions from database - they are the source of truth
       // The database positions are what were last saved when the user moved nodes
-      const flowNodes: Node[] = (data.nodes || []).map((n: any) => {
+      const flowNodes: Node[] = (data.nodes || []).map((n: any, index: number) => {
         const nodeData = JSON.parse(n.data);
         const label = nodeData.title || nodeData.shortSummary || nodeData.text || "";
         
@@ -77,6 +77,7 @@ export default function ProjectPage() {
           id: n.id,
           type: n.type,
           position: position, // Always use DB position - it's the saved state
+          zIndex: nodeData.zIndex ?? index,
           data: {
             ...nodeData,
             type: n.type,
@@ -155,13 +156,23 @@ export default function ProjectPage() {
     // Place new node near the center of existing nodes, or use a smart position
     let position = { x: 0, y: 0 };
     if (nodes.length > 0) {
-      // Calculate center of existing nodes
-      const centerX = nodes.reduce((sum, n) => sum + n.position.x, 0) / nodes.length;
-      const centerY = nodes.reduce((sum, n) => sum + n.position.y, 0) / nodes.length;
-      // Place new node slightly offset from center based on type
-      const offsetX = type === "evidence" ? 150 : type === "validation" ? 0 : -150;
-      const offsetY = type === "evidence" ? 100 : type === "validation" ? 0 : -100;
-      position = { x: centerX + offsetX, y: centerY + offsetY };
+      // If a node is selected, place shapes below it for better visibility
+      if (type === "shape" && selectedNode) {
+        const baseX = selectedNode.position.x;
+        const baseY = selectedNode.position.y;
+        const nodeHeight = (selectedNode.data as any)?.height ?? 120;
+        position = { x: baseX, y: baseY + nodeHeight + 60 };
+      } else {
+        // Calculate center of existing nodes
+        const centerX = nodes.reduce((sum, n) => sum + n.position.x, 0) / nodes.length;
+        const centerY = nodes.reduce((sum, n) => sum + n.position.y, 0) / nodes.length;
+        // Place new node slightly offset from center based on type
+        const offsetX =
+          type === "evidence" ? 150 : type === "validation" ? 0 : type === "shape" ? 0 : -150;
+        const offsetY =
+          type === "evidence" ? 100 : type === "validation" ? 0 : type === "shape" ? 240 : -100;
+        position = { x: centerX + offsetX, y: centerY + offsetY };
+      }
     } else {
       // First node - place at origin
       position = { x: 0, y: 0 };
@@ -225,6 +236,7 @@ export default function ProjectPage() {
           id: newNode.id,
           type: newNode.type,
           position: { x: newNode.positionX, y: newNode.positionY },
+          zIndex: (parsedData as any).zIndex ?? nodes.length,
           data: {
             ...parsedData,
             type: newNode.type,
@@ -584,6 +596,59 @@ export default function ProjectPage() {
     }
   };
 
+  const handleDraftChange = useCallback((nodeId: string, data: NodeData) => {
+    const draftData = { ...data } as any;
+    delete draftData._status;
+    const label = (draftData as any).title || (draftData as any).shortSummary || "";
+
+    setNodes((prevNodes) =>
+      prevNodes.map((n) =>
+        n.id === nodeId
+          ? {
+              ...n,
+              data: {
+                ...draftData,
+                type: n.type,
+                status: (n.data as any)?.status || "draft",
+                label: label || n.type,
+              },
+            }
+          : n
+      )
+    );
+
+  }, [selectedNode]);
+
+  const handleReorderNode = useCallback(
+    (nodeId: string, direction: "front" | "back") => {
+      setNodes((prevNodes) => {
+        const target = prevNodes.find((n) => n.id === nodeId);
+        if (!target) return prevNodes;
+
+        const zValues = prevNodes.map((n) => (n.zIndex ?? 0));
+        const maxZ = Math.max(0, ...zValues);
+        const minZ = Math.min(0, ...zValues);
+        const nextZ = direction === "front" ? maxZ + 1 : minZ - 1;
+
+        const updated = prevNodes.map((n) =>
+          n.id === nodeId
+            ? {
+                ...n,
+                zIndex: nextZ,
+                data: {
+                  ...(n.data as any),
+                  zIndex: nextZ,
+                },
+              }
+            : n
+        );
+
+        return updated;
+      });
+    },
+    []
+  );
+
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center bg-[#f5f5f7]">
@@ -650,6 +715,8 @@ export default function ProjectPage() {
       <InspectorPanel
         selectedNode={selectedNode}
         onUpdateNode={handleUpdateNode}
+          onDraftChange={handleDraftChange}
+          onReorderNode={handleReorderNode}
         projectId={projectId}
       />
       )}
